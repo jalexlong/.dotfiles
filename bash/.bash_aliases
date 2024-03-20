@@ -13,16 +13,17 @@ alias search="apt search"
 alias uninstall="sudo apt remove"
 alias autoremove="sudo apt autoremove"
 
-# config
-alias vzsh="vim ~/.zshrc"
-alias valias="vim ~/.oh-my-zsh/custom/aliases.zsh"
-alias vvim="vim ~/.vimrc"
-alias vmakepkg="sudo vim /etc/makepkg.conf"
-alias vgrub="sudo vim /etc/default/grub"
-
 # power
 alias sr="sudo reboot"
 alias ssn="sudo shutdown now"
+
+# ls
+alias l="ls -lh --color=always --group-directories-first"
+alias ls="ls --color=always --group-directories-first"
+alias la="ls -a --color=always --group-directories-first"
+alias ll="ls -lh --color=always --group-directories-first"
+alias lt="ls -aHt --color=always --group-directories-first"
+alias lsa="ls -lah --color=always --group-directories-first"
 
 # cd
 alias home="cd ~"
@@ -36,9 +37,9 @@ alias pub="cd ~/Public"
 alias vids="cd ~/Videos"
 
 # cd - wsl edition
-alias cdrive="cd /mnt/c/"
-alias cusers="cd /mnt/c/Users"
-alias progfiles="cd '/mnt/c/Program Files'"
+#alias cdrive="cd /mnt/c/"
+#alias cusers="cd /mnt/c/Users"
+#alias progfiles="cd '/mnt/c/Program Files'"
 
 # cp
 alias cpd="cp -R"
@@ -59,11 +60,6 @@ alias smd="sudo mkdir -p"
 # python
 alias py="python3"
 
-# yt-dlp
-alias ytv="yt-dlp -f 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]' -N 4"
-alias yta="yt-dlp --extract-audio --audio-format mp3"
-
 # networking
-alias pping="prettyping"
 alias pingme="ping -c64 github.com"
 alias traceme="traceroute github.com"
