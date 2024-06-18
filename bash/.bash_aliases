@@ -49,13 +49,13 @@ alias scpd="sudo cp -R"
 alias smv="sudo mv"
 
 # rm
-alias rmd="rm -r"
+alias rmdir="rm -r"
 alias srm="sudo rm"
-alias srmd="sudo rm -r"
+alias srmdir="sudo rm -r"
 
 # mkdir
-alias md="mkdir -p"
-alias smd="sudo mkdir -p"
+alias mkdir="mkdir -p"
+alias smkdir="sudo mkdir -p"
 
 # python
 alias py="python3"

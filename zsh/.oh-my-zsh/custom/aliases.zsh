@@ -4,13 +4,24 @@ alias reload="cd ~ && source ~/.zshrc"
 # vim
 alias svim="sudo vim"
 
+# tmux
+alias tmls="tmux ls"
+alias tmn="tmux new"
+alias tma="tmux attach"
+
 # full system update
+update_all () {
+	sudo apt -y update && sudo apt -y upgrade
+	flatpak -y update
+	omz update
+	rustup update
+	tldr -u
+	yt-dlp -U
+	lobster -u
+}
+alias upall=update_all
 
 # apt
-alias upall="sudo apt update -y && sudo apt upgrade -y; flatpak update -y"
-alias install="sudo apt install"
-alias search="apt search"
-alias uninstall="sudo apt remove"
 alias autoremove="sudo apt autoremove"
 
 # config
@@ -24,13 +35,20 @@ alias vgrub="sudo vim /etc/default/grub"
 alias sr="sudo reboot"
 alias ssn="sudo shutdown now"
 
-# exa
-alias l="exa -lh --color=always --group-directories-first --icons"
+# cat -> bat
+alias cat="bat"
+
+# ls -> exa
 alias ls="exa --color=always --group-directories-first --icons"
-alias la="exa -a --color=always --group-directories-first --icons"
-alias ll="exa -lh --color=always --group-directories-first --icons"
-alias lt="exa -aHt --color=always --group-directories-first --icons"
-alias lsa="exa -lah --color=always --group-directories-first --icons"
+
+# ls
+alias la="ls -a"
+alias ll="ls -lh"
+alias lt="ls -aHT"
+alias lsa="ls -lah" # nice ls + la OR
+alias lla="ls -lah" # ll + la
+alias lst="ls -lahHT" # nice lt + ll OR
+alias ltl="ls -lahHT" # lt + ll
 
 # cd
 alias home="cd ~"
@@ -52,12 +70,17 @@ alias smv="sudo mv"
 
 # rm
 alias rmd="rm -r"
+alias rmdir="rm -r"
 alias srm="sudo rm"
 alias srmd="sudo rm -r"
+alias srmdir="sudo rm -r"
 
 # mkdir
 alias md="mkdir -p"
+alias mkd="mkdir -p"
 alias smd="sudo mkdir -p"
+alias smkd="sudo mkdir -p"
+alias mkdir="mkdir -p" # friendly default, keep at end of this section
 
 # brave
 alias brave="brave-browser"
@@ -69,6 +92,13 @@ alias py="python3"
 alias ytv="yt-dlp -f 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]' -N 4"
 alias yta="yt-dlp --extract-audio --audio-format mp3"
 
+# ytfzf
+alias ytreload="ytfzf --refresh-inv-instance"
+alias ytclear="ytfzf --history-clear=search && ytfzf --history-clear=watch"
+alias ytsearch="ytfzf --detach --show-thumbnails --async-thumbnails"
+alias ytaudio="ytfzf --detach --audio-only"
+alias ythistory="ytfzf -H"
+
 # journalctl
 alias jctl="journalctl -p 3 -xb"
 
@@ -77,6 +107,9 @@ alias pping="prettyping"
 alias pingme="ping -c64 github.com"
 alias traceme="traceroute github.com"
 
-# eye candy
+# clear (optional fetch)
+alias clr="clear " # whitespace to hide "you-should-use" warning on clear
 alias cls="clear && pfetch"
+alias ncls="clear && neofetch"
 alias matrix="unimatrix -s 93 -c magenta"
+alias clock="tock -mc -C 5"
