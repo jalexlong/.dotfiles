@@ -82,9 +82,6 @@ alias smd="sudo mkdir -p"
 alias smkd="sudo mkdir -p"
 alias mkdir="mkdir -p" # friendly default, keep at end of this section
 
-# brave
-alias brave="brave-browser"
-
 # python
 alias py="python3"
 
