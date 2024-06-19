@@ -35,20 +35,17 @@ alias vgrub="sudo vim /etc/default/grub"
 alias sr="sudo reboot"
 alias ssn="sudo shutdown now"
 
-# cat -> bat
-alias cat="bat"
-
 # ls -> exa
 alias ls="exa --color=always --group-directories-first --icons"
 
 # ls
-alias la="ls -a"
-alias ll="ls -lh"
-alias lt="ls -aHT"
-alias lsa="ls -lah" # nice ls + la OR
-alias lla="ls -lah" # ll + la
-alias lst="ls -lahHT" # nice lt + ll OR
-alias ltl="ls -lahHT" # lt + ll
+alias la="ls -a" # all
+alias ll="ls -lh" # long/list view
+alias lsa="ls -lah" # ls + la = lsa OR
+alias lla="ls -lah" # ll + la = lla
+alias lt="ls -aHT --level=3" # tree
+alias lst="ls -lahHT --level=3" # lt + ll = lst OR
+alias ltl="ls -lahHT --level=3" # lt + ll = ltl
 
 # cd
 alias home="cd ~"
