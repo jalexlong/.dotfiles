@@ -4,4 +4,4 @@
 	email = johnalexanderlong@gmail.com
 	name = J. Alex Long
 [core]
-	editor = vim
+	editor = nvim
