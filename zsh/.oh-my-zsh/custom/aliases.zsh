@@ -1,28 +1,63 @@
+# +-------------------------------+
+# |  JAlexLong's shortcut stash   |
+# |-------------------------------+
+
+# Welcome to my personal aliases!
+# (C) 2024 by JAlexLong
+
+# I used whitespaces at the end of
+# some aliases to hide the "you-should-use" 
+# warning from the zsh plugin
+# i.e. running 'clear' would trigger a ysu 
+# warning if you are using 'alias clr='clear'
+
 # quick zsh reload
-alias reload="cd ~ && source ~/.zshrc"
+function zsh_reload() {
+  cd $HOME
+  clear
+  source ~/.zshrc
+}
+alias reload=zsh_reload
 
-# vim
-alias svim="sudo vim"
-
-# tmux
-alias tmls="tmux ls"
-alias tmn="tmux new"
-alias tma="tmux attach"
-
-# full system update
-update_all () {
+# full system update including manually installed binaries
+# may have to create more comprehensive script for this
+# TODO: include Pop!_Shop here
+function update_all () {
 	sudo apt -y update && sudo apt -y upgrade
 	flatpak -y update
 	omz update
-	rustup update
+	rustup update # <<< rust, btw <<<
 	tldr -u
 	yt-dlp -U
 	lobster -u
 }
 alias upall=update_all
 
+# vi/vim -> neovim
+alias vi="nvim "
+alias vim="nvim "
+alias svim="sudo nvim "
+
+# WE USE NEOVIM IN THIS HOUSE >:U
+alias nano="nvim " # !!!
+
+# accidental extra vim :q - aka rage :q
+alias :q="cowsay -f eyes \"Listen bud, this isn't vim! Get that outta \
+  here!! At least have the dang decency to look at the screen before \
+  you start quitting out of things...\""
+alias :wq=":q"
+
+# tmux
+alias tmls="tmux ls " # trailing space to avoid you-should-use warning
+alias tmn="tmux new "
+alias tma="tmux attach "
+
+
 # apt
 alias autoremove="sudo apt autoremove"
+
+# clear cache
+alias clean="rm -rf ~/.cache/*"
 
 # config
 alias vzsh="vim ~/.zshrc"
@@ -30,10 +65,27 @@ alias valias="vim ~/.oh-my-zsh/custom/aliases.zsh"
 alias vvim="vim ~/.vimrc"
 alias vmakepkg="sudo vim /etc/makepkg.conf"
 alias vgrub="sudo vim /etc/default/grub"
+alias vnvim="nvim ~/.config/nvim/ "
 
 # power
 alias sr="sudo reboot"
 alias ssn="sudo shutdown now"
+
+# ping & fping -> prettyping
+alias ping="prettyping "
+alias pingme="ping -c64 github.com"
+alias traceme="traceroute github.com"
+
+# clear (with optional system fetch)
+alias cls="clear && pfetch"
+alias clr="clear "
+alias ncls="clear && neofetch"
+
+# cmatrix
+alias matrix="unimatrix -s 93 -c magenta"
+
+# term-clock -> tock (rust, btw)
+alias clock="tock -mc -C 5"
 
 # ls -> exa
 alias ls="exa --color=always --group-directories-first --icons"
@@ -56,6 +108,7 @@ alias dldz="cd ~/Downloads"
 alias pics="cd ~/Pictures"
 alias proj="cd ~/Code"
 alias pub="cd ~/Public"
+alias sync="cd ~/Sync"
 alias vids="cd ~/Videos"
 
 # cp
@@ -73,37 +126,33 @@ alias srmd="sudo rm -r"
 alias srmdir="sudo rm -r"
 
 # mkdir
-alias md="mkdir -p"
-alias mkd="mkdir -p"
-alias smd="sudo mkdir -p"
-alias smkd="sudo mkdir -p"
-alias mkdir="mkdir -p" # friendly default, keep at end of this section
+alias mkdir="mkdir -p "
+alias md="mkdir"
+alias mkd="mkdir"
+alias smd="sudo mkdir"
+alias smkd="sudo mkdir"
 
 # python
 alias py="python3"
 
-# yt-dlp
-alias ytv="yt-dlp -f 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]' -N 4"
-alias yta="yt-dlp --extract-audio --audio-format mp3"
+# brave-browser
+alias brave="brave-browser" # --enable-features=Speedreader:tts/true \
+#   &>/dev/null &"
 
 # ytfzf
-alias ytreload="ytfzf --refresh-inv-instance"
+alias ytrefresh="ytfzf --refresh-inv-instance"
 alias ytclear="ytfzf --history-clear=search && ytfzf --history-clear=watch"
-alias ytsearch="ytfzf --detach --show-thumbnails --async-thumbnails"
+alias ytvideo="ytfzf --detach --show-thumbnails --async-thumbnails"
 alias ytaudio="ytfzf --detach --audio-only"
+alias ytmusic="ytfzf --detach --audio-only"
 alias ythistory="ytfzf -H"
+
+# yt-dlp
+alias ytdlv="yt-dlp -f 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]' -N 4 \
+  --keep-video --write-thumbnail --write-subs --write-auto-subs \
+  --embed-subs --embed-thumbnail --embed-metadata --embed-chapters \
+  --embed-info-json --sponsorblock-remove sponsor"
+alias ytdla="yt-dlp --extract-audio --audio-format mp3 --audio-quality 0"
 
 # journalctl
 alias jctl="journalctl -p 3 -xb"
-
-# networking
-alias pping="prettyping"
-alias pingme="ping -c64 github.com"
-alias traceme="traceroute github.com"
-
-# clear (optional fetch)
-alias clr="clear " # whitespace to hide "you-should-use" warning on clear
-alias cls="clear && pfetch"
-alias ncls="clear && neofetch"
-alias matrix="unimatrix -s 93 -c magenta"
-alias clock="tock -mc -C 5"
