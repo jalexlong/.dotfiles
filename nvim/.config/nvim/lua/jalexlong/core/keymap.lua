@@ -1,7 +1,7 @@
 -- set space as <leader>
 vim.g.mapleader = " "
 
--- set space -> p -> v chord to look at directory
+-- set space-p-v chord to look at directory
 vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
 
 --  visual mode move

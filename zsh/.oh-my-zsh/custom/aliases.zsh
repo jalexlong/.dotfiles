@@ -10,14 +10,7 @@
 # warning from the zsh plugin
 # i.e. running 'clear' would trigger a ysu 
 # warning if you are using 'alias clr='clear'
-
-# quick zsh reload
-function zsh_reload() {
-  cd $HOME
-  clear
-  source ~/.zshrc
-}
-alias reload=zsh_reload
+# ---------------------------------
 
 # full system update including manually installed binaries
 # may have to create more comprehensive script for this
@@ -30,8 +23,20 @@ function update_all () {
 	tldr -u
 	yt-dlp -U
 	lobster -u
+  msfupdate
 }
 alias upall=update_all
+
+# quick zsh refresh
+function zsh_refresh() {
+  cd $HOME
+  clear
+  source ~/.zshrc
+}
+alias refresh=zsh_reload
+
+# quick zsh reload
+alias reload="source ~/.zshrc"
 
 # vi/vim -> neovim
 alias vi="nvim "
@@ -52,19 +57,39 @@ alias tmls="tmux ls " # trailing space to avoid you-should-use warning
 alias tmn="tmux new "
 alias tma="tmux attach "
 
+# git - start a working area
+alias gcl="git clone "
+alias gin="git init "
+# git - work on current change
+alias gad="git add "
+alias gmv="git mv "
+alias grs="git restore "
+alias grm="git rm "
+# git - examine history and state
+alias gdf="git diff "
+alias glg="git log "
+alias gsh="git show "
+alias gst="git status "
+# git - grow, mark, tweak your common history
+alias gbr="git branch "
+alias gcm="git commit "
+alias gmr="git merge "
+alias grb="git rebase "
+alias gsw="git switch "
+# git - remote collaboration
+alias gfc="git fetch "
+alias gpl="git pull "
+alias gps="git push "
 
 # apt
-alias autoremove="sudo apt autoremove"
+alias autoremove="sudo apt autoremove "
 
 # clear cache
 alias clean="rm -rf ~/.cache/*"
 
-# config
+# quick configs
 alias vzsh="vim ~/.zshrc"
 alias valias="vim ~/.oh-my-zsh/custom/aliases.zsh"
-alias vvim="vim ~/.vimrc"
-alias vmakepkg="sudo vim /etc/makepkg.conf"
-alias vgrub="sudo vim /etc/default/grub"
 alias vnvim="nvim ~/.config/nvim/ "
 
 # power
@@ -110,6 +135,7 @@ alias proj="cd ~/Code"
 alias pub="cd ~/Public"
 alias sync="cd ~/Sync"
 alias vids="cd ~/Videos"
+alias vms="cd ~/Virtual\ Machines"
 
 # cp
 alias cpd="cp -R"
