@@ -1,20 +1,22 @@
-# +-------------------------------+
-# |  JAlexLong's shortcut stash   |
-# |-------------------------------+
+# +---------------------------------------+
+# |      JAlexLong's shortcut stash       |
+# |---------------------------------------+
 
-# Welcome to my personal aliases!
+# Welcome to my personal zsh+omz aliases!
 # (C) 2024 by JAlexLong
 
-# I used whitespaces at the end of
+# -----------------------------------------
+# NOTE: I use whitespaces at the end of
 # some aliases to hide the "you-should-use" 
-# warning from the zsh plugin
-# i.e. running 'clear' would trigger a ysu 
-# warning if you are using 'alias clr='clear'
-# ---------------------------------
+# (aka "YSU") zsh plugin warning
+# i.e. running 'clear' would trigger a 
+# "YSU" warning if you have anything
+# aliased to 'clear' with no trailing
+# whitespace.
+# -----------------------------------------
 
 # full system update including manually installed binaries
 # may have to create more comprehensive script for this
-# TODO: include Pop!_Shop here
 function update_all () {
 	sudo apt -y update && sudo apt -y upgrade
 	flatpak -y update
@@ -23,11 +25,11 @@ function update_all () {
 	tldr -u
 	yt-dlp -U
 	lobster -u
-  msfupdate
+    msfupdate
 }
 alias upall=update_all
 
-# quick zsh refresh
+# full zsh refresh
 function zsh_refresh() {
   cd $HOME
   clear
@@ -38,79 +40,31 @@ alias refresh=zsh_reload
 # quick zsh reload
 alias reload="source ~/.zshrc"
 
-# vi/vim -> neovim
-alias vi="nvim "
+# vim -> neovim
 alias vim="nvim "
 alias svim="sudo nvim "
 
 # WE USE NEOVIM IN THIS HOUSE >:U
 alias nano="nvim " # !!!
 
-# accidental extra vim :q - aka rage :q
+# accidental input of extra vim :q - aka rage quit
 alias :q="cowsay -f eyes \"Listen bud, this isn't vim! Get that outta \
   here!! At least have the dang decency to look at the screen before \
   you start quitting out of things...\""
 alias :wq=":q"
 
-# tmux
-alias tmls="tmux ls " # trailing space to avoid you-should-use warning
-alias tmn="tmux new "
-alias tma="tmux attach "
-
-# git - start a working area
-alias gcl="git clone "
-alias gin="git init "
-# git - work on current change
-alias gad="git add "
-alias gmv="git mv "
-alias grs="git restore "
-alias grm="git rm "
-# git - examine history and state
-alias gdf="git diff "
-alias glg="git log "
-alias gsh="git show "
-alias gst="git status "
-# git - grow, mark, tweak your common history
-alias gbr="git branch "
-alias gcm="git commit "
-alias gmr="git merge "
-alias grb="git rebase "
-alias gsw="git switch "
-# git - remote collaboration
-alias gfc="git fetch "
-alias gpl="git pull "
-alias gps="git push "
-
-# apt
-alias autoremove="sudo apt autoremove "
-
-# clear cache
-alias clean="rm -rf ~/.cache/*"
-
-# quick configs
-alias vzsh="vim ~/.zshrc"
-alias valias="vim ~/.oh-my-zsh/custom/aliases.zsh"
-alias vnvim="nvim ~/.config/nvim/ "
-
-# power
-alias sr="sudo reboot"
-alias ssn="sudo shutdown now"
-
-# ping & fping -> prettyping
-alias ping="prettyping "
-alias pingme="ping -c64 github.com"
-alias traceme="traceroute github.com"
-
-# clear (with optional system fetch)
-alias cls="clear && pfetch"
-alias clr="clear "
-alias ncls="clear && neofetch"
-
-# cmatrix
-alias matrix="unimatrix -s 93 -c magenta"
-
-# term-clock -> tock (rust, btw)
-alias clock="tock -mc -C 5"
+# directory shortcuts
+alias home="cd ~"
+alias conf="cd ~/.config"
+alias desk="cd ~/Desktop"
+alias docs="cd ~/Documents"
+alias dldz="cd ~/Downloads"
+alias pics="cd ~/Pictures"
+alias proj="cd ~/Code"
+alias pub="cd ~/Public"
+alias sync="cd ~/Sync"
+alias vids="cd ~/Videos"
+alias vms="cd ~/Virtual\ Machines"
 
 # ls -> exa
 alias ls="exa --color=always --group-directories-first --icons"
@@ -123,19 +77,6 @@ alias lla="ls -lah" # ll + la = lla
 alias lt="ls -aHT --level=3" # tree
 alias lst="ls -lahHT --level=3" # lt + ll = lst OR
 alias ltl="ls -lahHT --level=3" # lt + ll = ltl
-
-# cd
-alias home="cd ~"
-alias conf="cd ~/.config"
-alias desk="cd ~/Desktop"
-alias docs="cd ~/Documents"
-alias dldz="cd ~/Downloads"
-alias pics="cd ~/Pictures"
-alias proj="cd ~/Code"
-alias pub="cd ~/Public"
-alias sync="cd ~/Sync"
-alias vids="cd ~/Videos"
-alias vms="cd ~/Virtual\ Machines"
 
 # cp
 alias cpd="cp -R"
@@ -158,12 +99,72 @@ alias mkd="mkdir"
 alias smd="sudo mkdir"
 alias smkd="sudo mkdir"
 
+# tmux
+alias tmls="tmux ls " # trailing space to avoid you-should-use warning
+alias tmn="tmux new "
+alias tma="tmux attach "
+
+# git - start a working area
+alias gcl="git clone "
+alias gin="git init "
+
+# git - modify a working area
+alias gad="git add "
+alias gmv="git mv "
+alias grs="git restore "
+alias grm="git rm "
+
+# git - examine history and state
+alias gdf="git diff "
+alias glg="git log "
+alias gsh="git show "
+alias gst="git status "
+
+# git - grow, mark, tweak your common history
+alias gbr="git branch "
+alias gcm="git commit "
+alias gmr="git merge "
+alias grb="git rebase "
+alias gsw="git switch "
+
+# git - remote collaboration
+alias gfc="git fetch "
+alias gpl="git pull "
+alias gps="git push "
+
+# clear cache
+alias clean="rm -rf ~/.cache/*"
+
+# quick configs
+alias vzsh="vim ~/.zshrc"
+alias valias="vim ~/.oh-my-zsh/custom/aliases.zsh"
+alias vnvim="nvim ~/.config/nvim/ "
+
+# networking
+alias ping="prettyping "
+alias pingme="ping -c64 github.com"
+alias traceme="traceroute github.com"
+
+# clear (with optional system fetch)
+alias cls="clear && pfetch"
+alias clr="clear "
+alias ncls="clear && neofetch"
+
+# unimatrix
+alias matrix="unimatrix -s 93 -c magenta"
+
+# term-clock -> tock (rust, btw)
+alias clock="tock -mc -C 5"
+
+# journalctl
+alias jctl="journalctl -p 3 -xb"
+
 # python
 alias py="python3"
 
-# brave-browser
-alias brave="brave-browser" # --enable-features=Speedreader:tts/true \
-#   &>/dev/null &"
+# power
+alias sr="sudo reboot"
+alias ssn="sudo shutdown now"
 
 # ytfzf
 alias ytrefresh="ytfzf --refresh-inv-instance"
@@ -180,5 +181,7 @@ alias ytdlv="yt-dlp -f 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]' -N 4 \
   --embed-info-json --sponsorblock-remove sponsor"
 alias ytdla="yt-dlp --extract-audio --audio-format mp3 --audio-quality 0"
 
-# journalctl
-alias jctl="journalctl -p 3 -xb"
+# brave-browser
+alias brave="brave-browser --enable-features=Speedreader:tts/true \
+    &>/dev/null &"
+
