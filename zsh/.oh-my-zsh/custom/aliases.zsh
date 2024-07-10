@@ -20,12 +20,12 @@
 function update_all () {
 	sudo apt -y update && sudo apt -y upgrade
 	flatpak -y update
+  sudo yt-dlp -U
+  sudo lobster -u
 	omz update
 	rustup update # <<< rust, btw <<<
 	tldr -u
-	yt-dlp -U
-	lobster -u
-    msfupdate
+  msfupdate
 }
 alias upall=update_all
 
