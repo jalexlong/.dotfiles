@@ -15,19 +15,43 @@
 # whitespace.
 # -----------------------------------------
 
-# full system update including manually installed binaries
-# may have to create more comprehensive script for this
-function update_all () {
-	sudo apt -y update && sudo apt -y upgrade
-	flatpak -y update
-  sudo yt-dlp -U
-  sudo lobster -u
-	omz update
-	rustup update # <<< rust, btw <<<
-	tldr -u
-  msfupdate
+# full system update including manually installed binaries and alternate 
+# package managers like flatpak, AppImage, etc.
+function full_system_upgrade() {
+    sudo echo 'Starting full system upgrade.'
+    sleep 1
+
+    # exit the script if any errors occur
+    set -e  
+    echo "[+] Updating apt packages."
+    sleep 1
+    sudo apt -y update && sudo apt -y upgrade
+
+    echo "[+] Updating yt-dlp."
+    sleep 1
+    sudo yt-dlp -U
+
+    echo "[+] Updating flatpaks."
+    sleep 1
+    flatpak -y update
+
+    echo "[+] Updating lobster."
+    sleep 1
+    sudo lobster -u
+
+    echo "[+] Updating tldr caches."
+    sleep 1
+    tldr -u
+
+    echo "[+] Updating rust, btw."
+    sleep 1
+    rustup update
+
+    echo "[+] Updating oh-my-zsh."
+    sleep 1
+    omz update
 }
-alias upall=update_all
+alias upall=full_system_upgrade
 
 # full zsh refresh
 function zsh_refresh() {
@@ -35,7 +59,7 @@ function zsh_refresh() {
   clear
   source ~/.zshrc
 }
-alias refresh=zsh_reload
+alias refresh=zsh_refresh
 
 # quick zsh reload
 alias reload="source ~/.zshrc"
@@ -51,6 +75,7 @@ alias nano="nvim " # !!!
 alias :q="cowsay -f eyes \"Listen bud, this isn't vim! Get that outta \
   here!! At least have the dang decency to look at the screen before \
   you start quitting out of things...\""
+alias :w=":q"
 alias :wq=":q"
 
 # directory shortcuts
