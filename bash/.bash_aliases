@@ -3,20 +3,45 @@
 # |---------------------------------------+
 
 # Welcome to my personal bash aliases!
-# (C) 2024 by JAlexLong
+# (C) 2024-2025 by JAlexLong
 
-# full system update
-alias upall="sudo apt update -y && sudo apt upgrade -y && tldr -u"
+# full update for apt, flatpak and more.
+function full_system_upgrade() {
+    # exit the script if any errors occur
+    set -e  
+
+    sudo echo 'Starting full system upgrade.'
+    sleep 1
+
+    echo "[+] Updating apt packages."
+    sleep 1
+    sudo apt -y update && sudo apt -y full-upgrade
+
+    # update flatpaks if flatpak is installed
+    if [[ -e /usr/bin/flatpak ]]; then
+	    echo "[+] Updating flatpaks."
+	    sleep 1
+	    flatpak -y update
+    else
+	    echo "[+] Flatpak not installed. Skipping."
+    fi
+
+    if [[ -e /usr/bin/tldr ]]; then
+	    echo "[+] Updating tldr/tealdeer caches."
+	    sleep 1
+	    tldr -u
+    fi
+}
+alias upall=full_system_upgrade
 
 # full bash refresh
-function bash_refresh() {
+function refresh() {
   cd $HOME
   clear
   source ~/.bashrc
 }
-alias refresh=bash_refresh
 
-# quick bash reload
+# quick bash config reload
 alias reload="source ~/.bashrc"
 
 # vim -> neovim
@@ -24,12 +49,13 @@ alias vim="nvim "
 alias svim="sudo nvim "
 
 # WE USE NEOVIM IN THIS HOUSE >:U
-alias nano="nvim "
+alias nano="nvim " # !!!
 
-# accidental input of extra vim chord ':q' will give glaring eyes
+# accidental input of extra vim :q - aka rage quit
 alias :q="cowsay -f eyes \"Listen bud, this isn't vim! Get that outta \
   here!! At least have the dang decency to look at the screen before \
   you start quitting out of things...\""
+alias :w=":q"
 alias :wq=":q"
 
 # directory shortcuts
@@ -40,18 +66,10 @@ alias docs="cd ~/Documents"
 alias dldz="cd ~/Downloads"
 alias pics="cd ~/Pictures"
 alias proj="cd ~/Code"
-alias pub="cd ~/Public"
-alias sync="cd ~/Sync"
 alias vids="cd ~/Videos"
-alias vms="cd ~/Virtual\ Machines"
 
-# cd - wsl edition
-#alias cdrive="cd /mnt/c/"
-#alias cusers="cd /mnt/c/Users"
-#alias progfiles="cd '/mnt/c/Program Files'"
-
-# ls -> exa
-alias ls="exa --color=always --group-directories-first --icons"
+# ls -> eza
+alias ls="eza --color=always --group-directories-first --icons "
 
 # ls
 alias la="ls -a" # all
@@ -64,10 +82,9 @@ alias ltl="ls -lahHT --level=3" # lt + ll = ltl
 
 # cp
 alias cpd="cp -R"
-alias scpd="sudo cp -R"
 
 # mv
-alias smv="sudo mv"
+alias smv="sudo mv " # we schmoovin'
 
 # rm
 alias rmd="rm -r"
@@ -78,10 +95,9 @@ alias srmdir="sudo rm -r"
 
 # mkdir
 alias mkdir="mkdir -p "
-alias md="mkdir"
 alias mkd="mkdir"
-alias smd="sudo mkdir"
 alias smkd="sudo mkdir"
+alias smkdir="sudo mkdir"
 
 # tmux
 alias tmls="tmux ls " # trailing space to avoid you-should-use warning
@@ -120,17 +136,28 @@ alias gps="git push "
 alias clean="rm -rf ~/.cache/*"
 
 # quick configs
-alias vbash="nvim ~/.bashrc "
-alias valias="nvim ~/.bash_aliases "
-alias vnvim="nvim ~/.config/nvim/ "
+alias vbash="vim ~/.bashrc"
+alias valias="vim ~/.bash_aliases"
+alias vnvim="vim ~/.config/nvim/ "
 
 # networking
 alias pingme="ping -c64 github.com"
 alias traceme="traceroute github.com"
 
-# clear (with optional system fetch)
-alias cls="clear && neofetch"
-alias clr="clear "
+# clear
+alias cls="clear "
+
+# matrix effect
+if [[ -e /usr/bin/unimatrix ]]; then
+    alias matrix="unimatrix -s 93 -c magenta"
+elif [[ -e /usr/bin/cmatrix ]]; then
+    alias matrix="cmatrix "
+fi
+
+# term-clock -> tock (rust, btw)
+if [[ -e /usr/bin/tock ]]; then
+    alias clock="tock -mc -C 5"
+fi
 
 # journalctl
 alias jctl="journalctl -p 3 -xb"
@@ -142,7 +169,21 @@ alias py="python3"
 alias sr="sudo reboot"
 alias ssn="sudo shutdown now"
 
-# brave-browser
-alias brave="brave-browser --enable-features=Speedreader:tts/true \
-    &>/dev/null &"
+# ytfzf
+if [[ -e /usr/bin/yt-fzf ]]; then
+	alias ytrefresh="ytfzf --refresh-inv-instance"
+	alias ytclear="ytfzf --history-clear=search && ytfzf --history-clear=watch"
+	alias ytvideo="ytfzf --detach --show-thumbnails --async-thumbnails"
+	alias ytaudio="ytfzf --detach --audio-only"
+	alias ytmusic="ytfzf --detach --audio-only"
+	alias ythistory="ytfzf -H"
+fi
 
+# yt-dlp
+if [[ -e /usr/bin/yt-dlp ]]; then
+	alias ytdlv="yt-dlp -f 'bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]' -N 4 \
+	  --keep-video --write-thumbnail --write-subs --write-auto-subs \
+	  --embed-subs --embed-thumbnail --embed-metadata --embed-chapters \
+	  --embed-info-json --sponsorblock-remove sponsor"
+	alias ytdla="yt-dlp --extract-audio --audio-format mp3 --audio-quality 0"
+fi
