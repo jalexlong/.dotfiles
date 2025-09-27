@@ -44,12 +44,16 @@ function refresh() {
 # quick bash config reload
 alias reload="source ~/.bashrc"
 
-# vim -> neovim
-alias vim="nvim "
-alias svim="sudo nvim "
+# vim
+alias vi="vim "
+alias svim="sudo vim "
 
-# WE USE NEOVIM IN THIS HOUSE >:U
-alias nano="nvim " # !!!
+# nvim - use .vimrc instead of nvim config
+alias nvim="nvim -u ~/.vimrc"
+alias snvim="sudo nvim -u ~/.vimrc"
+
+# WE USE VIM IN THIS HOUSE >:U
+alias nano="vim " # !!!
 
 # accidental input of extra vim :q - aka rage quit
 alias :q="cowsay -f eyes \"Listen bud, this isn't vim! Get that outta \
@@ -61,6 +65,7 @@ alias :wq=":q"
 # directory shortcuts
 alias home="cd ~"
 alias conf="cd ~/.config"
+alias dots="cd ~/.dotfiles"
 alias desk="cd ~/Desktop"
 alias docs="cd ~/Documents"
 alias dldz="cd ~/Downloads"
@@ -138,7 +143,10 @@ alias clean="rm -rf ~/.cache/*"
 # quick configs
 alias vbash="vim ~/.bashrc"
 alias valias="vim ~/.bash_aliases"
-alias vnvim="vim ~/.config/nvim/ "
+alias vvim="vim ~/.vimrc"
+alias vnvim="vim ~/.config/nvim/"
+alias vsway="vim ~/.config/sway/config"
+alias vwaybar="vim ~/.config/waybar/"
 
 # networking
 alias pingme="ping -c64 github.com"
@@ -158,9 +166,6 @@ fi
 if [[ -e /usr/bin/tock ]]; then
     alias clock="tock -mc -C 5"
 fi
-
-# journalctl
-alias jctl="journalctl -p 3 -xb"
 
 # python
 alias py="python3"
