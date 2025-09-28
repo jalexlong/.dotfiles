@@ -8,7 +8,7 @@
 # |(C) 2025 by JAlexLong under the GPLv3  |
 # +---------------------------------------+
 
-_VERSION='0.0.1'
+_VERSION='0.0.2'
 REQUIRED_PACKAGES=("git" "stow" "figlet")
 
 main() {
@@ -47,9 +47,6 @@ display_banner() {
 	return 0
 }
 
-backup_failure() {
-}
-
 install_dotfiles() {
 	echo -n "[?] Would you like to download and install JAlexLong's dotfiles? (Y/n)> "
 	read choice
@@ -63,10 +60,10 @@ install_dotfiles() {
 	# Check if a folder named ".dotfiles" exists in $HOME
 	if [[ -d $HOME/.dotfiles ]]; then
 		echo "[!] Uh-oh! It looks like you already have a folder named \".dotfiles\""
-		echo "\tin your home directory. Want me to back them up for you and install"
-		echo -n "\tmy theme? (y/N)> "
+		echo "    in your home directory. Want me to back them up for you and install"
+		echo -n "    my theme? (y/N)> "
 		read backup
-		case backup in
+		case $backup in
 			[yY]* ) echo "[*] Backing up dotfiles.";;
 			[nN]* ) return 1;;
 			* ) return 2;;
