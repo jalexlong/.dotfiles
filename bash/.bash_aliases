@@ -44,13 +44,10 @@ function refresh() {
 # quick bash config reload
 alias reload="source ~/.bashrc"
 
-# vim
-alias vi="vim "
-alias svim="sudo vim "
-
-# nvim - use .vimrc instead of nvim config
-alias nvim="nvim -u ~/.vimrc"
-alias snvim="sudo nvim -u ~/.vimrc"
+# vi/vim -> nvim - use .vimrc instead of nvim config
+alias vi="nvim -u ~/.vimrc"
+alias vim="nvim -u ~/.vimrc"
+alias svim="sudo nvim -u ~/.vimrc"
 
 # WE USE VIM IN THIS HOUSE >:U
 alias nano="vim " # !!!
