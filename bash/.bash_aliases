@@ -69,6 +69,7 @@ alias dldz="cd ~/Downloads"
 alias pics="cd ~/Pictures"
 alias proj="cd ~/Code"
 alias vids="cd ~/Videos"
+alias jams="cd ~/Music"
 
 # ls -> eza
 alias ls="eza --color=always --group-directories-first --icons "
@@ -90,16 +91,12 @@ alias smv="sudo mv " # we schmoovin'
 
 # rm
 alias rmd="rm -r"
-alias rmdir="rm -r"
 alias srm="sudo rm"
 alias srmd="sudo rm -r"
-alias srmdir="sudo rm -r"
 
 # mkdir
-alias mkdir="mkdir -p "
 alias mkd="mkdir"
 alias smkd="sudo mkdir"
-alias smkdir="sudo mkdir"
 
 # tmux
 alias tmls="tmux ls " # trailing space to avoid you-should-use warning
@@ -138,12 +135,17 @@ alias gps="git push "
 alias clean="rm -rf ~/.cache/*"
 
 # quick configs
-alias vbash="vim ~/.bashrc"
 alias valias="vim ~/.bash_aliases"
+alias vbash="vim ~/.bashrc"
 alias vvim="vim ~/.vimrc"
 alias vnvim="vim ~/.config/nvim/"
 alias vsway="vim ~/.config/sway/config"
 alias vwaybar="vim ~/.config/waybar/"
+alias vtmux="vim ~/.tmux.conf"
+alias vfetch="vim ~/.config/fastfetch/"
+
+# fastfetch
+alias ff="fastfetch "
 
 # networking
 alias pingme="ping -c64 github.com"

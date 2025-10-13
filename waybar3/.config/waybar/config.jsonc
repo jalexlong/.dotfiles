@@ -16,17 +16,17 @@
         "sway/window"
     ],
     "modules-right": [
-        "mpd",
+        // "mpd",
         "idle_inhibitor",
         // "pulseaudio",
         "network",
         "power-profiles-daemon",
-        "memory",
         "cpu",
+        "memory",
         "temperature",
-        // "backlight",
         "keyboard-state",
         // "sway/language",
+        "backlight",
         "battery",
         "battery#bat2",
         "clock",
@@ -133,7 +133,7 @@
     },
     "battery": {
         "states": {
-            // "good": 95,
+            "good": 95,
             "warning": 30,
             "critical": 15
         },

@@ -1,0 +1,21 @@
+#---------------------------------------#
+#		To Do List		#
+#---------------------------------------#
+[+] cool wallpaper
+[+] github ssh key upload
+[+] set nerd font for kitty
+[+] set FontAwesome for waybar
+[+] waybar config v1
+[+] vim config
+[+] dotfiles installer
+[+] kitty config
+[ ] waybar config v2  # gotta do this in a vm because no backups yet
+[ ] sway config v2    # and I'm not feelin' very schwifty
+[ ] plymouth config
+[ ] grub config
+[ ] qutebrowser config?
+[ ] dmenu/wofi config
+[ ] swaylock config
+[ ] keyboard layout fix
+[ ] tmux auto-layout
+[ ] sway workspace icons
