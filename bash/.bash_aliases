@@ -103,6 +103,9 @@ alias tmls="tmux ls " # trailing space to avoid you-should-use warning
 alias tmn="tmux new "
 alias tma="tmux attach "
 
+# kitty icat (view images in terminal)
+alias icat="kitty +kitten icat"
+
 # git - start a working area
 alias gcl="git clone "
 alias gin="git init "
