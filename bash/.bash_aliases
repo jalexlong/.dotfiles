@@ -7,37 +7,41 @@
 
 # full update for apt/pacman, flatpak and more.
 function full_system_upgrade() {
-    # exit the function if any errors occur
-    set -e  
+    # exit script if any commands return non-zero exit code
+    set -e
 
-    sudo echo 'Starting full system upgrade.'
+    sudo echo "Starting full system upgrade."
     sleep 1
 
     # update system packages
-    if command -v apt; then
+    if command -v apt &> /dev/null; then
 	    echo "[+] Updating apt packages."
 	    sleep 1
 	    sudo apt -y update && sudo apt -y full-upgrade
-    elif command -v pacman; then
+    elif command -v pacman &> /dev/null; then
 	    echo "[+] Updating pacman packages."
 	    sleep 1
 	    sudo pacman -Syu
     fi
 
     # update flatpak (if installed)
-    if command -v flatpak; then
+    if command -v flatpak &> /dev/null; then
 	    echo "[+] Updating flatpaks."
 	    sleep 1
 	    flatpak -y update
-    else
-	    echo "[+] Flatpak not installed. Skipping."
     fi
 
-    if command -v tldr ;then
+    # update tldr/tealdeer
+    if command -v tldr &> /dev/null; then
 	    echo "[+] Updating tldr/tealdeer caches."
 	    sleep 1
 	    tldr --update
     fi
+
+    # return to normal command mode
+    set +e
+
+    echo "[+] System upgrade complete!"
 }
 alias upall=full_system_upgrade
 

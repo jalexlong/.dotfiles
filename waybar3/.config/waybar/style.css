@@ -102,7 +102,7 @@ button:hover {
 	border-radius: 10px;
 	transition: none;
 	color: #1A1826;
-	background: #FAE3B0;
+	/* background: #FAE3B0; */
 }
 
 #window,
@@ -131,8 +131,8 @@ button:hover {
 }
 
 #battery.charging, #battery.plugged {
-	color: #ffffff;
-	background-color: #26A65B;
+	background-color: #2ecc71;
+	color: #000000;
 }
 
 @keyframes blink {
