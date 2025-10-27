@@ -5,6 +5,9 @@
 # Welcome to my personal bash aliases!
 # (C) 2024-2025 by JAlexLong
 
+# include optional aliases 
+source ~/.local/aliases/*
+
 # full update for apt/pacman, flatpak and more.
 function full_system_upgrade() {
     # exit script if any commands return non-zero exit code
@@ -116,8 +119,8 @@ alias \
 	rmd="rm -r" \
 	srm="sudo rm" \
 	srmd="sudo rm -r" \
-	mkd="mkdir" \
-	smkd="sudo mkdir" \
+	mkd="mkdir -p" \
+	smkd="sudo mkdir -p" \
 
 # tmux
 alias \

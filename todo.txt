@@ -9,13 +9,14 @@
 [+] vim config
 [+] dotfiles installer
 [+] kitty config
-[ ] waybar config v2  # gotta do this in a vm because no backups yet
-[ ] sway config v2    # and I'm not feelin' very schwifty
+[+] keyboard layout fix
+[-] sway workspace icons
+[-] waybar config v2
+[-] sway config v2
 [ ] plymouth config
 [ ] grub config
 [ ] qutebrowser config?
 [ ] dmenu/wofi config
 [ ] swaylock config
-[ ] keyboard layout fix
 [ ] tmux auto-layout
-[ ] sway workspace icons
+[ ] install tools in tiers
