@@ -10,9 +10,6 @@ source ~/.local/aliases/*
 
 # full update for apt/pacman, flatpak and more.
 function full_system_upgrade() {
-    # exit script if any commands return non-zero exit code
-    set -e
-
     sudo echo "Starting full system upgrade."
     sleep 1
 
@@ -40,9 +37,6 @@ function full_system_upgrade() {
 	    sleep 1
 	    tldr --update
     fi
-
-    # return to normal command mode
-    set +e
 
     echo "[+] System upgrade complete!"
 }
