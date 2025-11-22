@@ -52,6 +52,9 @@ function refresh() {
 # bash config reload in-place
 alias reload="source ~/.bashrc"
 
+# query command paths and aliases
+alias cv="command -v"
+
 # Command upgrades
 # ls
 if command -v eza &> /dev/null; then
