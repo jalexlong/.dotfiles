@@ -172,7 +172,7 @@ alias \
 
 # python
 alias py="python3"
-alias activate="source venv/bin/activate"
+alias activate="source .venv/bin/activate"
 
 # clear cache
 alias clean="rm -rf ~/.cache/*"
