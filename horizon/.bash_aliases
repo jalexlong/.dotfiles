@@ -31,12 +31,12 @@ function full_system_upgrade() {
 	    flatpak -y update
     fi
 
-    # update tldr/tealdeer
-    if command -v tldr &> /dev/null; then
-	    echo "[+] Updating tldr/tealdeer caches."
-	    sleep 1
-	    tldr --update
-    fi
+    ## update tldr/tealdeer
+    #if command -v tldr &> /dev/null; then
+    #    echo "[+] Updating tldr/tealdeer caches."
+    #    sleep 1
+    #    tldr --update
+    #fi
 
     echo "[+] System upgrade complete!"
 }
