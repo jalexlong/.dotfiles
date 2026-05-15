@@ -1,7 +1,0 @@
-[init]
-	defaultBranch = main
-[user]
-	email = johnalexanderlong@gmail.com
-	name = J. Alex Long
-[core]
-	editor = nvim

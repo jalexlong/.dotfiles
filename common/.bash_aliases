@@ -6,48 +6,14 @@
 # (C) 2024-2025 by JAlexLong
 
 # include optional aliases 
-source ~/.local/aliases/*
+if [[ -d ~/.local/aliases ]]; then
+    source ~/.local/aliases/*
+fi
 
-# full update for apt/pacman, flatpak and more.
-function full_system_upgrade() {
-    sudo echo "Starting full system upgrade."
-    sleep 1
-
-    # update system packages
-    if command -v apt &> /dev/null; then
-	    echo "[+] Updating apt packages."
-	    sleep 1
-	    sudo apt -y update && sudo apt -y full-upgrade
-    elif command -v pacman &> /dev/null; then
-	    echo "[+] Updating pacman packages."
-	    sleep 1
-	    sudo pacman -Syu
-    fi
-
-    # update flatpak (if installed)
-    if command -v flatpak &> /dev/null; then
-	    echo "[+] Updating flatpaks."
-	    sleep 1
-	    flatpak -y update
-    fi
-
-    ## update tldr/tealdeer
-    #if command -v tldr &> /dev/null; then
-    #    echo "[+] Updating tldr/tealdeer caches."
-    #    sleep 1
-    #    tldr --update
-    #fi
-
-    echo "[+] System upgrade complete!"
-}
-alias upall=full_system_upgrade
-
-# quick bash refresh
-function refresh() {
-  cd $HOME
-  clear
-  source ~/.bashrc
-}
+# include bash functions
+if [[ -f ~/.bash_functions ]]; then
+    source ~/.bash_functions
+fi
 
 # bash config reload in-place
 alias reload="source ~/.bashrc"
@@ -64,16 +30,18 @@ elif command -v exa &> /dev/null; then
 else
 	alias ls="ls --color=always "
 fi
-# cd
-# -- zoxide goes here --
 
 # vi/vim -> nvim - use .vimrc instead of nvim config
-alias \
-	vi="nvim -u ~/.vimrc" \
-	vim="nvim -u ~/.vimrc" \
-	svim="sudo nvim -u ~/.vimrc" \
-	# WE USE NEOVIM IN THIS HOUSE >:U
-	nano="vim " # !!!
+if command -v nvim &> /dev/null; then
+    alias \
+        vi="nvim " \
+        vim="nvim " \
+        svim="sudo nvim "
+elif command -v vim &> /dev/null; then
+    alias \
+        vi="vim " \
+        svim="sudo vim "
+fi
 
 # accidental input of extra vim :q - aka rage quit
 if command -v cowsay &> /dev/null; then
@@ -127,10 +95,11 @@ alias \
 
 # quick configs
 alias \
-	valias="vim ~/.bash_aliases" \
 	vbash="vim ~/.bashrc" \
+	valias="vim ~/.bash_aliases" \
+    vfunc="vim ~/.bash_functions" \
 	vvim="vim ~/.vimrc" \
-	vnvim="vim ~/.config/nvim/" \
+	vnvim="vim ~/.config/nvim/init.vim" \
 	vsway="vim ~/.config/sway/config" \
 	vwaybar="vim ~/.config/waybar/" \
 	vtmux="vim ~/.tmux.conf" \

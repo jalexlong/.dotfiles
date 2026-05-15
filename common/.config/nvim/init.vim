@@ -2,8 +2,8 @@ set nocompatible
 syntax on
 filetype plugin indent on
 
-" hi Normal ctermbg=None guibg=None
-" hi NonText ctermbg=None guibg=None
+hi Normal ctermbg=None guibg=None
+hi NonText ctermbg=None guibg=None
 
 set number
 set relativenumber
@@ -22,7 +22,5 @@ set clipboard=unnamedplus
 set mouse=a
 set expandtab
 set autoindent
+set termguicolors
 
-if has('termguicolors') && $COLORTERM ==# 'truecolor'
-    set termguicolors
-endif
