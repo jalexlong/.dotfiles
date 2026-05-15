@@ -218,3 +218,7 @@ bar {
 }
 
 include /etc/sway/config.d/*
+
+# Load optional config fragments.
+include ~/.config/sway/config.d/*.conf
+

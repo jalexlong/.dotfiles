@@ -48,9 +48,17 @@ case "$PROFILE" in
         ./scripts/apply-base.sh
         ;;
 
+    chromebook)
+        ./scripts/packages-base-debian.sh
+        ./scripts/packages-kitty-debian.sh
+        ./scripts/packages-sway-debian.sh
+        ./scripts/ensure-shell-loaders.sh
+        ./scripts/apply-chromebook.sh
+        ;;
+
     *)
         echo "Unknown profile: $PROFILE"
-        echo "Usage: ./install.sh {base|popos|sway|ctf}"
+        echo "Usage: ./install.sh {base|popos|sway|chromebook|ctf}"
         exit 1
         ;;
 esac

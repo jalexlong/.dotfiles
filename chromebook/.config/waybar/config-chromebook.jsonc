@@ -1,0 +1,99 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 26,
+  "spacing": 4,
+
+  "modules-left": [
+    "sway/workspaces",
+    "sway/mode"
+  ],
+
+  "modules-center": [
+    "sway/window"
+  ],
+
+  "modules-right": [
+    "custom/vpn",
+    "custom/ip",
+    "cpu",
+    "memory",
+    "disk",
+    "battery",
+    "clock",
+    "tray"
+  ],
+
+  "sway/workspaces": {
+    "disable-scroll": true,
+    "all-outputs": true,
+    "format": "{name}"
+  },
+
+  "sway/mode": {
+    "format": "<span style=\"italic\">{}</span>"
+  },
+
+  "sway/window": {
+    "max-length": 48,
+    "separate-outputs": true
+  },
+
+  "custom/vpn": {
+    "exec": "ip addr show tun0 2>/dev/null | awk '/inet / {print $2}' | cut -d/ -f1 || true",
+    "interval": 10,
+    "format": "VPN {}",
+    "format-alt": "{}",
+    "tooltip": false
+  },
+
+  "custom/ip": {
+    "exec": "hostname -I | awk '{print $1}'",
+    "interval": 10,
+    "format": "IP {}",
+    "tooltip": false
+  },
+
+  "cpu": {
+    "interval": 5,
+    "format": "CPU {usage}%",
+    "tooltip": false
+  },
+
+  "memory": {
+    "interval": 5,
+    "format": "RAM {}%",
+    "tooltip": false
+  },
+
+  "disk": {
+    "interval": 30,
+    "path": "/",
+    "format": "DSK {percentage_used}%",
+    "tooltip": false
+  },
+
+  "battery": {
+    "interval": 10,
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "BAT {capacity}%",
+    "format-charging": "CHR {capacity}%",
+    "format-plugged": "AC {capacity}%",
+    "format-warning": "LOW {capacity}%",
+    "format-critical": "CRIT {capacity}%"
+  },
+
+  "clock": {
+    "interval": 60,
+    "format": "{:%a %H:%M}",
+    "tooltip-format": "{:%A, %B %d, %Y}"
+  },
+
+  "tray": {
+    "icon-size": 14,
+    "spacing": 6
+  }
+}
