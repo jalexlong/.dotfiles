@@ -18,6 +18,9 @@ fi
 # bash config reload in-place
 alias reload="source ~/.bashrc"
 
+# print PATH nicely
+alias path='echo "$PATH" | tr ":" "\n"'
+
 # query command paths and aliases
 alias cv="command -v"
 
