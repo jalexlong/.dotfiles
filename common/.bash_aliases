@@ -98,6 +98,7 @@ alias \
 	vbash="vim ~/.bashrc" \
 	valias="vim ~/.bash_aliases" \
     vfunc="vim ~/.bash_functions" \
+    vprofile="vim ~/.profile" \
 	vvim="vim ~/.vimrc" \
 	vnvim="vim ~/.config/nvim/init.vim" \
 	vsway="vim ~/.config/sway/config" \
