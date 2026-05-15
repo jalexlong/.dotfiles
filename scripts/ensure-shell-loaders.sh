@@ -19,7 +19,7 @@ BASHRC_EOF
 fi
 
 # Debian does not usually load ~/.bash_functions, so add that.
-if ! grep -q '.bash_functions "$BASHRC"; then
+if ! grep -q '.bash_functions' "$BASHRC"; then
     cat >> "$BASHRC" <<'BASHRC_EOF'
 
 # Load bash functions

@@ -13,7 +13,6 @@ sudo apt install -y \
     tmux \
     htop \
     btop \
-    fastfetch \
     ca-certificates \
     build-essential
 

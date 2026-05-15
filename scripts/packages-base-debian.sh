@@ -12,7 +12,5 @@ sudo apt install -y \
     vim \
     neovim \
     tmux \
-    htop \
     btop \
-    fastfetch \
     ca-certificates

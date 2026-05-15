@@ -6,7 +6,6 @@ DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
 cd "$DOTFILES_DIR"
 
 echo "[*] Applying Pop!_OS dotfiles"
-echo "[*] Applying base first"
 
 ./scripts/apply-base.sh
 
