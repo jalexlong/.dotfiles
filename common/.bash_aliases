@@ -16,7 +16,7 @@ if [[ -f ~/.bash_functions ]]; then
 fi
 
 # bash config reload in-place
-alias reload="source ~/.bashrc"
+alias reload="source ~/.profile && source ~/.bashrc"
 
 # print PATH nicely
 alias path='echo "$PATH" | tr ":" "\n"'
