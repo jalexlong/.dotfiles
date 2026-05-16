@@ -56,9 +56,13 @@ case "$PROFILE" in
         ./scripts/apply-chromebook.sh
         ;;
 
+    rust)
+        ./scripts/setup-rust.sh
+        ;;
+
     *)
         echo "Unknown profile: $PROFILE"
-        echo "Usage: ./install.sh {base|popos|sway|chromebook|ctf}"
+        echo "Usage: ./install.sh {base|popos|sway|chromebook|ctf|rust}"
         exit 1
         ;;
 esac
