@@ -13,4 +13,10 @@ sudo apt install -y \
     neovim \
     tmux \
     btop \
-    ca-certificates
+    ca-certificates \
+    zoxide
+
+# add required zoxide hook in ~/.bashrc if necessary
+if ! grep -q 'eval "$(zoxide init bash)"' "~/.bashrc"; then
+    echo 'eval "$(zoxide init bash)"' >> "~/.bashrc"
+fi
