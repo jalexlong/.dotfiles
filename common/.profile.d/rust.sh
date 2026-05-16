@@ -1,5 +1,9 @@
 # Rust/Cargo environment
 
-if [ -f "$HOME/.cargo/env" ]; then
-    . "$HOME/.cargo/env"
-fi
+export CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
+export RUSTUP_HOME="${RUSTUP_HOME:-$HOME/.rustup}"
+
+case ":$PATH:" in
+    *":$CARGO_HOME/bin:"*) ;;
+    *) export PATH="$CARGO_HOME/bin:$PATH" ;;
+esac

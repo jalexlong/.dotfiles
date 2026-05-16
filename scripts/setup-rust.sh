@@ -6,28 +6,40 @@ echo "[*] Installing rustup from apt"
 sudo apt update
 sudo apt install -y rustup
 
-echo "[*] Ensuring profile snippets are loaded"
+echo "[*] Ensuring shell/profile loaders exist"
 ./scripts/ensure-shell-loaders.sh
 
-echo "[*] Applying base dotfiles so ~/.profile.d/rust.sh exists"
+echo "[*] Applying base dotfiles"
 ./scripts/apply-base.sh
 
-echo "[*] Loading Rust/Cargo environment for this shell if available"
+echo "[*] Loading Rust/Cargo PATH for this shell"
 
-if [ -f "$HOME/.cargo/env" ]; then
-    # shellcheck disable=SC1091
-    . "$HOME/.cargo/env"
-fi
+export CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
+export RUSTUP_HOME="${RUSTUP_HOME:-$HOME/.rustup}"
+
+case ":$PATH:" in
+    *":$CARGO_HOME/bin:"*) ;;
+    *) export PATH="$CARGO_HOME/bin:$PATH" ;;
+esac
 
 echo "[*] Installing Rust stable toolchain"
-
 rustup default stable
 
-echo "[*] Rust setup complete"
+echo "[*] Rust setup result"
+echo "CARGO_HOME=$CARGO_HOME"
+echo "RUSTUP_HOME=$RUSTUP_HOME"
+echo "PATH contains Cargo bin:"
+case ":$PATH:" in
+    *":$CARGO_HOME/bin:"*) echo "yes: $CARGO_HOME/bin" ;;
+    *) echo "no" ;;
+esac
 
-if command -v rustc >/dev/null 2>&1; then
-    rustc --version
-else
-    echo "[!] rustc not found in current shell. Open a new terminal or run:"
-    echo "    source ~/.profile"
-fi
+echo
+command -v rustup || true
+command -v rustc || true
+command -v cargo || true
+
+echo
+rustup show || true
+rustc --version || true
+cargo --version || true
