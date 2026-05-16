@@ -18,5 +18,8 @@ sudo apt install -y \
 
 # add required zoxide hook in ~/.bashrc if necessary
 if ! grep -q 'eval "$(zoxide init bash)"' "$HOME/.bashrc"; then
-    echo 'eval "$(zoxide init bash)"' >> "$HOME/.bashrc"
+    cat > "$HOME/.bashrc" <<'EOF'
+# initialize zoxide hook
+eval "$(zoxide init bash)"
+EOF
 fi
