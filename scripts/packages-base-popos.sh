@@ -9,10 +9,23 @@ sudo apt install -y \
     curl \
     wget \
     unzip \
-    vim \
+    neovim \
     tmux \
-    htop \
+    btm \
     btop \
     ca-certificates \
-    build-essential
+    cmatrix \
+    cowsay \
+    eza \
+    lolcat \
+    pulseaudio-utils \
+    sensible-utils \
+    sl \
+    tmux \
+    zoxide
+
+# add required zoxide hook in ~/.bashrc if necessary
+if ! grep -q 'eval "$(zoxide init bash)"' "$BASHRC"; then
+    echo 'eval "$(zoxide init bash)"' >> ~/.bashrc
+fi
 
