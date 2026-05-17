@@ -4,24 +4,23 @@ set -euo pipefail
 sudo apt update
 
 sudo apt install -y \
-    git \
-    stow \
-    curl \
-    wget \
-    unzip \
-    neovim \
-    tmux \
     btm \
     btop \
     ca-certificates \
     cmatrix \
     cowsay \
+    curl \
     eza \
+    git \
     lolcat \
+    neovim \
     pulseaudio-utils \
     sensible-utils \
     sl \
+    stow \
     tmux \
+    unzip \
+    wget \
     zoxide
 
 # add required zoxide hook in ~/.bashrc if necessary

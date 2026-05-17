@@ -2,7 +2,8 @@
 
 # full update for apt/pacman, flatpak and more.
 function upall() {
-    sudo echo "Starting full system upgrade."
+    sudo -v
+    echo "Starting full system upgrade."
     sleep 1
 
     # update system packages
@@ -68,7 +69,7 @@ function extract() {
         *.tgz)      tar xzf "$1" ;;
         *.zip)      unzip "$1" ;;
         *.7z)       7z x "$1" ;;
-        *)          echo "extract: unknown archive type: $1"; return1 ;;
+        *)          echo "extract: unknown archive type: $1"; return 1 ;;
     esac
 }
 

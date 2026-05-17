@@ -10,11 +10,6 @@ if [[ -d ~/.local/aliases ]]; then
     source ~/.local/aliases/*
 fi
 
-# include bash functions
-if [[ -f ~/.bash_functions ]]; then
-    source ~/.bash_functions
-fi
-
 # bash config reload in-place
 alias reload="source ~/.profile && source ~/.bashrc"
 
