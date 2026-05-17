@@ -6,40 +6,32 @@ echo "[*] Installing rustup from apt"
 sudo apt update
 sudo apt install -y rustup
 
-echo "[*] Ensuring shell/profile loaders exist"
+echo "[*] Ensuring shell/profile loaders are present"
 ./scripts/ensure-shell-loaders.sh
 
 echo "[*] Applying base dotfiles"
 ./scripts/apply-base.sh
 
-echo "[*] Loading Rust/Cargo PATH for this shell"
+echo "[*] Ensuring Cargo bin directory exists"
+mkdir -p "$HOME/.cargo/bin"
 
-export CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
-export RUSTUP_HOME="${RUSTUP_HOME:-$HOME/.rustup}"
-
+echo "[*] Loading Cargo PATH for this installer shell"
 case ":$PATH:" in
-    *":$CARGO_HOME/bin:"*) ;;
-    *) export PATH="$CARGO_HOME/bin:$PATH" ;;
+    *":$HOME/.cargo/bin:"*) ;;
+    *) export PATH="$HOME/.cargo/bin:$PATH" ;;
 esac
 
 echo "[*] Installing Rust stable toolchain"
 rustup default stable
 
-echo "[*] Rust setup result"
-echo "CARGO_HOME=$CARGO_HOME"
-echo "RUSTUP_HOME=$RUSTUP_HOME"
-echo "PATH contains Cargo bin:"
-case ":$PATH:" in
-    *":$CARGO_HOME/bin:"*) echo "yes: $CARGO_HOME/bin" ;;
-    *) echo "no" ;;
-esac
+echo "[*] Rust setup complete"
+
+echo "[*] Tool versions:"
+command -v rustup >/dev/null 2>&1 && rustup --version || true
+command -v rustc >/dev/null 2>&1 && rustc --version || true
+command -v cargo >/dev/null 2>&1 && cargo --version || true
 
 echo
-command -v rustup || true
-command -v rustc || true
-command -v cargo || true
+echo "Open a new terminal, or run:"
+echo "  source ~/.profile"
 
-echo
-rustup show || true
-rustc --version || true
-cargo --version || true
