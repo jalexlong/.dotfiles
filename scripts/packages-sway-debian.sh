@@ -10,7 +10,7 @@ sudo apt install -y \
     swayidle \
     mako-notifier \
     wofi \
-    kitty \
+    foot \
     grim \
     slurp \
     wl-clipboard \
@@ -19,4 +19,7 @@ sudo apt install -y \
     fonts-jetbrains-mono \
     fonts-font-awesome \
     fonts-noto-color-emoji \
-    network-manager
+    network-manager \
+    pipewire \
+    pipewire-pulse \
+    wireplumber

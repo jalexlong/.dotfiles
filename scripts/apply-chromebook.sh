@@ -14,4 +14,7 @@ if [ -d chromebook ]; then
     stow -v -S -d "$DOTFILES_DIR" -t "$HOME" chromebook
 fi
 
+# Enable PipeWire for the current user
+systemctl --user --now enable pipewire.service pipewire-pulse.service wireplumber.service
+
 echo "[*] Chromebook dotfiles applied."
