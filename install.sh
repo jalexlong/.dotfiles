@@ -50,7 +50,7 @@ case "$PROFILE" in
 
     chromebook)
         ./scripts/packages-base-debian.sh
-        ./scripts/packages-kitty-debian.sh
+        ./scripts/packages-foot-debian.sh
         ./scripts/packages-sway-debian.sh
         ./scripts/ensure-shell-loaders.sh
         ./scripts/apply-chromebook.sh
