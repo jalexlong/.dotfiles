@@ -1,2 +1,4 @@
 */.gitignore
 .nvimlog
+common/.ssh/*
+!common/.ssh/config
