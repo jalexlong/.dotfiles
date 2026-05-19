@@ -2,13 +2,16 @@
 
 ignore-empty-password
 show-failed-attempts
-indicator
-clock
+indicator-idle-visible
+indicator-caps-lock
 
 font=JetBrainsMono Nerd Font
 font-size=20
 
 color=020403
+
+indicator-radius=58
+indicator-thickness=8
 
 inside-color=07110bee
 inside-clear-color=092313ee
@@ -24,6 +27,9 @@ ring-wrong-color=ff3864ff
 
 key-hl-color=b7ffbfff
 bs-hl-color=ff3864ff
+caps-lock-key-hl-color=ffcf5aff
+caps-lock-bs-hl-color=ff3864ff
+
 separator-color=00000000
 
 text-color=b7ffbfff
@@ -37,4 +43,8 @@ line-clear-color=00000000
 line-caps-lock-color=00000000
 line-ver-color=00000000
 line-wrong-color=00000000
+
+layout-bg-color=07110bee
+layout-border-color=39ff74ff
+layout-text-color=b7ffbfff
 
