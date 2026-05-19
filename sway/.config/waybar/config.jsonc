@@ -28,7 +28,7 @@
         // "sway/language",
         "backlight",
         "battery",
-        "battery#bat2",
+        "battery#bat0",
         "clock",
         "tray",
         "custom/power"
@@ -146,8 +146,8 @@
         // "format-full": "",
         "format-icons": ["", "", "", "", ""]
     },
-    "battery#bat2": {
-        "bat": "BAT2"
+    "battery#bat0": {
+        "bat": "BAT0"
     },
     "power-profiles-daemon": {
       "format": "{icon}",

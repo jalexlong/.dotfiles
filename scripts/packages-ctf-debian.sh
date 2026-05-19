@@ -21,9 +21,7 @@ sudo apt install -y \
     strace \
     ltrace \
     file \
-    radare2 \
     tcpdump \
     whois \
-    dnsutils \
-    wordlists
+    dnsutils
 
