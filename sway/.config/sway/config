@@ -14,8 +14,6 @@ set $right l
 set $term foot
 # Your preferred swaybar
 set $waybar_cmd = waybar
-# Import config fragments/overrides
-include ~/.config/sway/config.d/*.conf
 # Your preferred application launcher
 set $menu wofi -S drun
 # Your preferred file manager
@@ -29,8 +27,6 @@ gaps outer 5
 
 # Slim border
 default_border pixel 2
-
-include /etc/sway/config-vars.d/*
 
 ### Output configuration
 #
@@ -213,6 +209,13 @@ bindsym $mod+r mode "resize"
     bindsym Print exec grim
     bindsym --locked XF86SelectiveScreenshot exec grim -g "$(slurp)" -t png
 
+# Import global config fragments/overrides
+include /etc/sway/config.d/*
+include /etc/sway/config-vars.d/*
+
+# Import config fragments/overrides
+include ~/.config/sway/config.d/*.conf
+
 #
 # Status Bar:
 #
@@ -220,6 +223,4 @@ bindsym $mod+r mode "resize"
 bar {
     swaybar_command $waybar_cmd
 }
-
-include /etc/sway/config.d/*
 
