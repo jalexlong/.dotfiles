@@ -1,104 +1,90 @@
 * {
   border: none;
   border-radius: 0;
-  font-family: "JetBrains Mono", "Font Awesome 6 Free", monospace;
-  font-size: 11px;
+  font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font Mono", monospace;
+  font-size: 10.5px;
   min-height: 0;
 }
 
 window#waybar {
-  background: #11111b;
-  color: #cdd6f4;
-  border-bottom: 2px solid #313244;
+  background: #050807;
+  color: #b7ffbf;
+  border-bottom: 1px solid #12351d;
 }
 
+/* Workspaces */
 #workspaces {
-  background: #181825;
+  background: #07110b;
 }
 
 #workspaces button {
-  padding: 0 7px;
-  color: #6c7086;
+  padding: 0 6px;
+  margin: 0;
+  color: #3f7f4d;
   background: transparent;
 }
 
 #workspaces button.focused,
 #workspaces button.active {
-  color: #11111b;
-  background: #89b4fa;
+  color: #050807;
+  background: #39ff74;
 }
 
 #workspaces button.visible {
-  color: #cdd6f4;
+  color: #b7ffbf;
 }
 
 #workspaces button.urgent {
-  color: #11111b;
-  background: #f38ba8;
+  color: #050807;
+  background: #ff3864;
 }
 
-#mode {
-  color: #11111b;
-  background: #f9e2af;
-  padding: 0 8px;
-}
-
+/* Centered window title */
 #window {
-  color: #bac2de;
-  padding: 0 8px;
+  color: #7fdc8f;
+  padding: 0 7px;
 }
 
+/* All right-side modules share this base */
 #custom-vpn,
 #custom-ip,
 #cpu,
 #memory,
 #disk,
 #battery,
-#clock,
-#tray {
-  padding: 0 7px;
-  margin: 0 1px;
-  background: #181825;
-}
-
-#custom-vpn {
-  color: #a6e3a1;
-}
-
-#custom-vpn:empty {
-  padding: 0;
-  margin: 0;
-  background: transparent;
-}
-
-#custom-ip {
-  color: #89dceb;
-}
-
-#cpu {
-  color: #fab387;
-}
-
-#memory {
-  color: #a6e3a1;
-}
-
-#disk {
-  color: #f9e2af;
-}
-
-#battery {
-  color: #cba6f7;
-}
-
-#battery.warning {
-  color: #f9e2af;
-}
-
-#battery.critical {
-  color: #f38ba8;
-}
-
 #clock {
-  color: #b4befe;
+  padding: 0 6px;
+  margin: 0 1px;
+  background: #07110b;
 }
+
+/* VPN — neon green when active, invisible when not */
+#custom-vpn {
+  color: #39ff74;
+}
+
+/* IP */
+#custom-ip {
+  color: #65ffda;
+}
+
+/* System stats */
+#cpu    { color: #d7ff6b; }
+#memory { color: #39ff74; }
+#disk   { color: #ffcf5a; }
+
+/* Battery states */
+#battery              { color: #b48cff; }
+#battery.charging     { color: #00ff9f; }
+#battery.plugged      { color: #4488aa; }
+#battery.warning      { color: #ffcf5a; }
+#battery.critical     {
+  color: #ff3864;
+  background: #21060c;
+}
+
+/* Clock — primary accent, most important */
+#clock {
+  color: #b7ffbf;
+}
+

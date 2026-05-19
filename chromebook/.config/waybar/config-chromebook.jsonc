@@ -1,12 +1,11 @@
 {
   "layer": "top",
   "position": "top",
-  "height": 26,
-  "spacing": 4,
+  "height": 24,
+  "spacing": 2,
 
   "modules-left": [
     "sway/workspaces",
-    "sway/mode"
   ],
 
   "modules-center": [
@@ -21,7 +20,6 @@
     "disk",
     "battery",
     "clock",
-    "tray"
   ],
 
   "sway/workspaces": {
@@ -30,70 +28,61 @@
     "format": "{name}"
   },
 
-  "sway/mode": {
-    "format": "<span style=\"italic\">{}</span>"
-  },
-
   "sway/window": {
     "max-length": 48,
     "separate-outputs": true
   },
 
   "custom/vpn": {
-    "exec": "ip addr show tun0 2>/dev/null | awk '/inet / {print $2}' | cut -d/ -f1 || true",
+    "exec": "ip addr show tun0 2>/dev/null | awk '/inet / {print $2}' | cut -d/ -f1",
     "interval": 10,
-    "format": "VPN {}",
-    "format-alt": "{}",
+    "format": "vpn:{}",
     "tooltip": false
   },
 
   "custom/ip": {
     "exec": "hostname -I | awk '{print $1}'",
     "interval": 10,
-    "format": "IP {}",
+    "format": "ip:{}",
     "tooltip": false
   },
 
   "cpu": {
     "interval": 5,
-    "format": "CPU {usage}%",
+    "format": "cpu:{usage}%",
     "tooltip": false
   },
 
   "memory": {
     "interval": 5,
-    "format": "RAM {}%",
+    "format": "mem:{percentage}%",
     "tooltip": false
   },
 
   "disk": {
     "interval": 30,
     "path": "/",
-    "format": "DSK {percentage_used}%",
+    "format": "dsk:{percentage_used}%",
     "tooltip": false
   },
-
+  
   "battery": {
     "interval": 10,
     "states": {
       "warning": 30,
       "critical": 15
     },
-    "format": "BAT {capacity}%",
-    "format-charging": "CHR {capacity}%",
-    "format-plugged": "AC {capacity}%",
-    "format-warning": "LOW {capacity}%",
-    "format-critical": "CRIT {capacity}%"
+    "format": "bat:{capacity}%",
+    "format-charging": "chr:{capacity}%",
+    "format-plugged": "ac:{capacity}%",
+    "format-warning": "low:{capacity}%",
+    "format-critical": "crit:{capacity}%",
+    "tooltip": false
   },
 
   "clock": {
     "interval": 60,
     "format": "{:%a %H:%M}",
     "tooltip-format": "{:%A, %B %d, %Y}"
-  },
-
-  "tray": {
-    "icon-size": 14,
-    "spacing": 6
   }
 }
