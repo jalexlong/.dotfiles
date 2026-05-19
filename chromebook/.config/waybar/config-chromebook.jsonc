@@ -1,11 +1,13 @@
 {
   "layer": "top",
   "position": "top",
-  "height": 24,
-  "spacing": 2,
+  "height": 26,
+  "spacing": 3,
 
   "modules-left": [
+    "custom/host",
     "sway/workspaces",
+    "sway/mode"
   ],
 
   "modules-center": [
@@ -20,7 +22,15 @@
     "disk",
     "battery",
     "clock",
+    "tray"
   ],
+
+  "custom/host": {
+      "exec": "hostname",
+      "interval": 3600,
+      "format": "root@{}",
+      "tooltip": false
+  },
 
   "sway/workspaces": {
     "disable-scroll": true,
@@ -28,9 +38,17 @@
     "format": "{name}"
   },
 
+  "sway/mode": {
+      "format": "MODE:{}"
+  },
+
   "sway/window": {
-    "max-length": 48,
-    "separate-outputs": true
+    "max-length": 44,
+    "separate-outputs": true,
+    "rewrite": {
+        "(.*) - foot": "$1",
+        "(.*) - kitty": "$1",
+        "(.*) - Mozilla Firefox": "$1"
   },
 
   "custom/vpn": {
@@ -50,12 +68,20 @@
   "cpu": {
     "interval": 5,
     "format": "cpu:{usage}%",
+    "states": {
+        "warning": 70,
+        "critical": 90
+    },
     "tooltip": false
   },
 
   "memory": {
     "interval": 5,
-    "format": "mem:{percentage}%",
+    "format": "ram:{}%",
+    "states": {
+        "warning": 70,
+        "critical": 85
+    },
     "tooltip": false
   },
 
@@ -63,6 +89,10 @@
     "interval": 30,
     "path": "/",
     "format": "dsk:{percentage_used}%",
+    "states": {
+        "warning": 75,
+        "critical": 90
+    },
     "tooltip": false
   },
   
@@ -73,7 +103,7 @@
       "critical": 15
     },
     "format": "bat:{capacity}%",
-    "format-charging": "chr:{capacity}%",
+    "format-charging": "chg:{capacity}%",
     "format-plugged": "ac:{capacity}%",
     "format-warning": "low:{capacity}%",
     "format-critical": "crit:{capacity}%",
@@ -84,5 +114,12 @@
     "interval": 60,
     "format": "{:%a %H:%M}",
     "tooltip-format": "{:%A, %B %d, %Y}"
+  },
+
+  "tray": {
+      "icon-size": 13,
+      "spacing": 5
   }
 }
+}
+
