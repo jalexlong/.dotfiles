@@ -7,7 +7,6 @@ cd "$DOTFILES_DIR"
 
 echo "[*] Applying Chromebook dotfiles"
 
-./scripts/apply-sway.sh
 ./scripts/apply-foot.sh
 
 if [ -d chromebook ]; then

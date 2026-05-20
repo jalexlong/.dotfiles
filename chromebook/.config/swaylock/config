@@ -1,4 +1,5 @@
-# paperweight-pro swaylock theme
+# Catppuccin Macchiato swaylock theme
+# Plain Debian swaylock-compatible config
 
 ignore-empty-password
 show-failed-attempts
@@ -6,37 +7,37 @@ indicator-idle-visible
 indicator-caps-lock
 
 font=JetBrainsMono Nerd Font
-font-size=20
+font-size=18
 
-color=020403
+color=181926
 
-indicator-radius=58
+indicator-radius=64
 indicator-thickness=8
 
-inside-color=07110bee
-inside-clear-color=092313ee
-inside-caps-lock-color=1d1a05ee
-inside-ver-color=071a2aee
-inside-wrong-color=21050cee
+inside-color=24273add
+inside-clear-color=24273add
+inside-caps-lock-color=24273add
+inside-ver-color=24273add
+inside-wrong-color=24273add
 
-ring-color=39ff74ff
-ring-clear-color=65ffdaff
-ring-caps-lock-color=ffcf5aff
-ring-ver-color=89b4faff
-ring-wrong-color=ff3864ff
+ring-color=c6a0f6ff
+ring-clear-color=91d7e3ff
+ring-caps-lock-color=eed49fff
+ring-ver-color=8aadf4ff
+ring-wrong-color=ed8796ff
 
-key-hl-color=b7ffbfff
-bs-hl-color=ff3864ff
-caps-lock-key-hl-color=ffcf5aff
-caps-lock-bs-hl-color=ff3864ff
+key-hl-color=a6da95ff
+bs-hl-color=ed8796ff
+caps-lock-key-hl-color=eed49fff
+caps-lock-bs-hl-color=ed8796ff
 
 separator-color=00000000
 
-text-color=b7ffbfff
-text-clear-color=65ffdaff
-text-caps-lock-color=ffcf5aff
-text-ver-color=89b4faff
-text-wrong-color=ff3864ff
+text-color=cad3f5ff
+text-clear-color=91d7e3ff
+text-caps-lock-color=eed49fff
+text-ver-color=8aadf4ff
+text-wrong-color=ed8796ff
 
 line-color=00000000
 line-clear-color=00000000
@@ -44,7 +45,7 @@ line-caps-lock-color=00000000
 line-ver-color=00000000
 line-wrong-color=00000000
 
-layout-bg-color=07110bee
-layout-border-color=39ff74ff
-layout-text-color=b7ffbfff
+layout-bg-color=24273add
+layout-border-color=c6a0f6ff
+layout-text-color=cad3f5ff
 

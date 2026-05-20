@@ -1,0 +1,160 @@
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 10.5px;
+    min-height: 0;
+}
+
+window#waybar {
+    background: alpha(@crust, 0.96);
+    color: @text;
+    border-bottom: 1px solid alpha(@mauve, 0.45);
+}
+
+/* Identity block */
+
+#custom-host {
+    color: @crust;
+    background: @mauve;
+    padding: 0 8px;
+    margin: 0;
+    font-weight: bold;
+}
+
+/* Workspaces */
+
+#workspaces {
+    background: alpha(@base, 0.92);
+    padding: 0 2px;
+}
+
+#workspaces button {
+    color: @overlay0;
+    background: transparent;
+    padding: 0 6px;
+    margin: 0;
+}
+
+#workspaces button.focused,
+#workspaces button.active {
+    color: @crust;
+    background: @lavender;
+}
+
+#workspaces button.visible {
+    color: @text;
+}
+
+#workspaces button.urgent {
+    color: @crust;
+    background: @red;
+}
+
+/* Sway mode */
+
+#mode {
+    color: @crust;
+    background: @yellow;
+    padding: 0 8px;
+    margin: 0 2px;
+    font-weight: bold;
+}
+
+/* Center windows title */
+
+#window {
+    color: @subtext1;
+    padding: 0 8px;
+}
+
+/* Right-side status modules */
+
+#custom-vpn,
+#custom-ip,
+#cpu,
+#memory,
+#disk,
+#battery,
+#clock,
+#tray {
+    background: alpha(@base, 0.92);
+    padding: 0 7px;
+    margin: 0 1px;
+    border-left: 1px solid alpha(@surface2, 0.55);
+}
+
+#custom-vpn {
+    color: @green;
+    background: alpha(@green, 0.14);
+}
+
+#custom-ip {
+    color: @sky;
+}
+
+#cpu {
+    color: @peach;
+}
+
+#cpu.warning {
+    color: @yellow;
+}
+
+#cpu.critical {
+    color: @red;
+    background: alpha(@red, 0.16);
+}
+
+#memory {
+    color: @green;
+}
+#memory.warning {
+    color: @yellow;
+}
+
+#memory.critical {
+    color: @red;
+    background: alpha(@red, 0.16);
+}
+
+#disk {
+    color: @yellow;
+}
+
+#disk.warning {
+    color: @peach;
+}
+
+#disk.critical {
+    color: @red;
+    background: alpha(@red, 0.16);
+}
+
+#battery {
+    color: @sapphire;
+}
+
+#battery.charging,
+#battery.plugged {
+    color: @green;
+}
+
+#battery.warning {
+    color: @yellow;
+}
+
+#battery.critical {
+    color: @red;
+    background: alpha(@red, 0.16);
+}
+
+#clock {
+    color: @mauve;
+    background: alpha(@mauve, 0.13);
+}
+
+#tray {
+    padding-right: 6px;
+}
+

@@ -11,6 +11,6 @@ if command -v gsettings >/dev/null 2>&1; then
     gsettings set org.gnome.desktop.interface cursor-size 20 || true
     gsettings set org.gnome.desktop.interface font-name 'JetBrainsMono Nerd Font 10' || true
 else
-    echo "[!] gsettings not found; skipping GSettings theme preferences"
+    echo "[!] gsettings not found; relying on GTK settings.ini and environment variables"
 fi
 
