@@ -29,18 +29,6 @@ case "$PROFILE" in
         ./scripts/apply-popos.sh
         ;;
 
-    sway)
-        ./scripts/packages-base-debian.sh
-
-        if [ -x ./scripts/packages-kitty-debian.sh ]; then
-            ./scripts/packages-kitty-debian.sh
-        fi
-
-        ./scripts/packages-sway-debian.sh
-        ./scripts/ensure-shell-loaders.sh
-        ./scripts/apply-sway.sh
-        ;;
-
     ctf)
         ./scripts/packages-base-debian.sh
         ./scripts/packages-ctf-debian.sh
@@ -50,8 +38,7 @@ case "$PROFILE" in
 
     chromebook)
         ./scripts/packages-base-debian.sh
-        ./scripts/packages-foot-debian.sh
-        ./scripts/packages-sway-debian.sh
+        ./scripts/packages-chromebook-debian.sh
         ./scripts/ensure-shell-loaders.sh
         ./scripts/apply-chromebook.sh
         ;;

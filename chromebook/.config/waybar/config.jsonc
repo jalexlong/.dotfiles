@@ -52,6 +52,7 @@
   },
 
   "custom/vpn": {
+    "exec-if": "ip addr show tun0 2>/dev/null",
     "exec": "ip addr show tun0 2>/dev/null | awk '/inet / {print $2}' | cut -d/ -f1",
     "interval": 10,
     "format": "vpn:{}",
