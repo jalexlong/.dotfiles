@@ -1,160 +1,136 @@
 * {
-    border: none;
-    border-radius: 0;
-    font-family: "JetBrainsMono Nerd Font", monospace;
-    font-size: 10.5px;
-    min-height: 0;
+  border: none;
+  border-radius: 0;
+  font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", monospace;
+  font-size: 15px;
+  min-height: 0;
 }
 
 window#waybar {
-    background: alpha(@crust, 0.96);
-    color: @text;
-    border-bottom: 1px solid alpha(@mauve, 0.45);
-}
-
-/* Identity block */
-
-#custom-host {
-    color: @crust;
-    background: @mauve;
-    padding: 0 8px;
-    margin: 0;
-    font-weight: bold;
+  background: transparent;
+  color: @text;
 }
 
 /* Workspaces */
 
 #workspaces {
-    background: alpha(@base, 0.92);
-    padding: 0 2px;
+  border-radius: 1rem;
+  margin: 5px 0 5px 1rem;
+  background-color: alpha(@surface0, 0.92);
 }
 
 #workspaces button {
-    color: @overlay0;
-    background: transparent;
-    padding: 0 6px;
-    margin: 0;
+  color: @lavender;
+  background: transparent;
+  border-radius: 1rem;
+  padding: 0.35rem 0.55rem;
+  margin: 0;
 }
 
 #workspaces button.focused,
 #workspaces button.active {
-    color: @crust;
-    background: @lavender;
+  color: @sky;
+  background-color: alpha(@surface1, 0.85);
 }
 
 #workspaces button.visible {
-    color: @text;
+  color: @text;
+}
+
+#workspaces button:hover {
+  color: @sapphire;
+  background-color: alpha(@surface1, 0.7);
 }
 
 #workspaces button.urgent {
-    color: @crust;
-    background: @red;
+  color: @crust;
+  background-color: @red;
 }
 
-/* Sway mode */
+/* Shared module styling */
 
-#mode {
-    color: @crust;
-    background: @yellow;
-    padding: 0 8px;
-    margin: 0 2px;
-    font-weight: bold;
-}
-
-/* Center windows title */
-
-#window {
-    color: @subtext1;
-    padding: 0 8px;
-}
-
-/* Right-side status modules */
-
-#custom-vpn,
-#custom-ip,
-#cpu,
-#memory,
-#disk,
-#battery,
+#custom-music,
+#tray,
+#backlight,
 #clock,
-#tray {
-    background: alpha(@base, 0.92);
-    padding: 0 7px;
-    margin: 0 1px;
-    border-left: 1px solid alpha(@surface2, 0.55);
+#battery,
+#pulseaudio,
+#custom-lock,
+#custom-power {
+  background-color: alpha(@surface0, 0.92);
+  padding: 0.45rem 0.85rem;
+  margin: 5px 0;
 }
 
-#custom-vpn {
-    color: @green;
-    background: alpha(@green, 0.14);
+/* Center music pill */
+
+#custom-music {
+  color: @mauve;
+  border-radius: 1rem;
+  margin-left: 1rem;
+  margin-right: 1rem;
 }
 
-#custom-ip {
-    color: @sky;
+/* Right module group */
+
+#pulseaudio {
+  color: @maroon;
+  border-radius: 1rem 0 0 1rem;
+  margin-left: 1rem;
 }
 
-#cpu {
-    color: @peach;
-}
-
-#cpu.warning {
-    color: @yellow;
-}
-
-#cpu.critical {
-    color: @red;
-    background: alpha(@red, 0.16);
-}
-
-#memory {
-    color: @green;
-}
-#memory.warning {
-    color: @yellow;
-}
-
-#memory.critical {
-    color: @red;
-    background: alpha(@red, 0.16);
-}
-
-#disk {
-    color: @yellow;
-}
-
-#disk.warning {
-    color: @peach;
-}
-
-#disk.critical {
-    color: @red;
-    background: alpha(@red, 0.16);
+#backlight {
+  color: @yellow;
+  border-radius: 0;
 }
 
 #battery {
-    color: @sapphire;
+  color: @green;
+  border-radius: 0;
 }
 
 #battery.charging,
 #battery.plugged {
-    color: @green;
+  color: @green;
 }
 
-#battery.warning {
-    color: @yellow;
+#battery.warning:not(.charging) {
+  color: @yellow;
 }
 
-#battery.critical {
-    color: @red;
-    background: alpha(@red, 0.16);
+#battery.critical:not(.charging) {
+  color: @red;
 }
 
 #clock {
-    color: @mauve;
-    background: alpha(@mauve, 0.13);
+  color: @blue;
+  border-radius: 0 1rem 1rem 0;
+  margin-right: 1rem;
 }
 
 #tray {
-    padding-right: 6px;
+  border-radius: 1rem;
+  margin-right: 1rem;
+}
+
+#custom-lock {
+  color: @lavender;
+  border-radius: 1rem 0 0 1rem;
+}
+
+#custom-lock:hover {
+  color: @crust;
+  background-color: @lavender;
+}
+
+#custom-power {
+  color: @red;
+  border-radius: 0 1rem 1rem 0;
+  margin-right: 1rem;
+}
+
+#custom-power:hover {
+  color: @crust;
+  background-color: @red;
 }
 
