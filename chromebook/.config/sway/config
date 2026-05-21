@@ -26,24 +26,6 @@ gaps outer 5
 # Slim border
 default_border pixel 2
 
-### Output configuration
-#
-# Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
-# This is commented in Debian, because the Sway wallpaper files are in a separate
-# package `sway-backgrounds`. Installing this package drops a config file to
-# /etc/sway/config.d/
-# output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
-#
-# Example configuration:
-#
-#   output HDMI-A-1 resolution 1920x1080 position 1920,0
-#
-# You can get the names of your outputs by running: swaymsg -t get_outputs
-
-### Idle configuration
-
-### Input configuration
-
 ### Key bindings
 #
 # Basics:
@@ -64,6 +46,11 @@ default_border pixel 2
 
     # Start web browser
     bindsym $mod+b exec $browser
+
+    # Useful utilities
+    bindsym $mod_c exec wl-copy < /dev/null
+    bindsym $mod+Shift+b exec sh -c 'pkill -SIGUSR1 waybar || waybar'
+    bindsym $mod+Shift+n exec makoctl dismiss --all
 
     # Drag floating windows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.
@@ -148,28 +135,6 @@ default_border pixel 2
     # Show the next scratchpad window or hide the focused scratchpad window.
     # If there are multiple scratchpad windows, this command cycles through them.
     bindsym $mod+minus scratchpad show
-
-    # Chromebook top-row function keys
-    # F1=Back  F2=Forward  F3=Refresh  F4=Fullscreen
-    # F5=<skip>  F6=Brightness-  F7=Brightness+
-    # F8=Mute  F9=Vol-  F10=Vol+
-    bindsym F1  workspace prev
-    bindsym F2  workspace next
-    bindsym F3  reload
-    bindsym F4  fullscreen toggle
-    bindsym F6  exec brightnessctl set 5%-
-    bindsym F7  exec brightnessctl set 5%+
-    bindsym F8  exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
-    bindsym F9  exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
-    bindsym F10 exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
-
-# Clipboard helpers
-bindsym $mod+c exec wl-copy < /dev/null
-
-# Quick system tools
-bindsym $mod+Shift+b exec sh -c 'pkill -SIGUSR1 waybar || waybar'
-bindsym $mod+Shift+n exec makoctl dismiss --all
-bindsym $mod+Control+l exec swaylock -c 11111b
 
 #
 # Resizing containers:
