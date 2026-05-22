@@ -127,8 +127,8 @@ alias \
 
 # networking
 alias \
-	pingme="ping -c64 github.com" \
-	traceme="traceroute github.com" \
+	pingme="ping -c64 google.com" \
+	traceme="traceroute google.com" \
 	ip="ip -c" \
 	ipa="ip -br -f inet addr" \
 	ipl="ip -br link"
