@@ -99,7 +99,7 @@ alias \
     vprofile="vim ~/.profile" \
 	vvim="vim ~/.vimrc" \
 	vnvim="vim ~/.config/nvim/init.vim" \
-	vsway="vim ~/.config/sway/config" \
+	vsway="vim ~/.config/sway/config.d/" \
 	vwaybar="vim ~/.config/waybar/" \
 	vtmux="vim ~/.tmux.conf" \
 	vfetch="vim ~/.config/fastfetch/"
