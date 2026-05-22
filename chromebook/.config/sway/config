@@ -48,7 +48,7 @@ default_border pixel 2
     bindsym $mod+b exec $browser
 
     # Useful utilities
-    bindsym $mod_c exec wl-copy < /dev/null
+    bindsym $mod+c exec wl-copy < /dev/null
     bindsym $mod+Shift+b exec sh -c 'pkill -SIGUSR1 waybar || waybar'
     bindsym $mod+Shift+n exec makoctl dismiss --all
 
