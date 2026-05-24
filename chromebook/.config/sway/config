@@ -31,8 +31,8 @@ default_border pixel 2
 # Basics:
 #
     # Start a terminal
-    bindsym $mod+t exec $term
-    bindsym $mod+Shift+t exec $term --title floating-terminal
+    bindsym $mod+Return exec $term
+    bindsym $mod+Shift+Return exec $term --title floating-terminal
     for_window [title="floating-terminal"] floating enable, resize set width 900 px height 500 px, move position center
 
     # Kill focused window
@@ -119,10 +119,10 @@ default_border pixel 2
     bindsym $mod+m fullscreen
 
     # Toggle the current focus between tiling and floating mode
-    bindsym $mod+Shift+g floating toggle
+    bindsym $mod+Shift+space floating toggle
 
     # Swap focus between the tiling area and the floating area
-    bindsym $mod+g focus mode_toggle
+    bindsym $mod+space focus mode_toggle
 #
 # Scratchpad:
 #
