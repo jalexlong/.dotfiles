@@ -1,43 +1,87 @@
 {
   "layer": "top",
   "position": "top",
-  "height": 34,
+  "height": 30,
   "spacing": 0,
 
   "modules-left": [
-    "sway/workspaces"
+    "sway/mode",
+    "sway/scratchpad",
+    "cpu",
+    "memory"
   ],
 
   "modules-center": [
-    "custom/music"
+    "sway/workspaces"
   ],
 
   "modules-right": [
+    "tray",
+    "idle_inhibitor",
+    "network",
     "pulseaudio",
     "backlight",
     "battery",
-    "clock",
-    "tray",
-    "custom/lock",
-    "custom/power"
+    "clock"
   ],
+
+  "sway/mode": {
+      "format": "<span style=\"italic\">{}</span>"
+  },
+
+  "sway/scratchpad": {
+    "format": "{icon} {count}",
+    "show-empty": false,
+    "format-icons": ["", ""],
+    "tooltip": true,
+    "tooltip-format": "{app}: {title}"
+  },
 
   "sway/workspaces": {
     "disable-scroll": true,
     "all-outputs": true,
     "format": " {icon} ",
     "format-icons": {
-      "1": "\uf489",
-      "2": "\udb81\udd9f",
-      "3": "\uf44f",
-      "4": "\udb81\udcc7",
-      "5": "\uf1ff"
+      "1": "",
+      "2": "󰖟",
+      "3": "",
+      "4": "",
+      "5": "",
+      "urgent": "",
+      "default": ""
     }
+  },
+
+  "cpu": {
+    "format": "{usage}% ",
+    "tooltip": false
+  },
+
+  "memory": {
+    "format": "{}% "
   },
 
   "tray": {
     "icon-size": 17,
     "spacing": 8
+  },
+
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+        "activated": "",
+        "deactivated": ""
+    }
+  },
+
+  "network": {
+    "family": "ipv4",
+    "format-wifi": "{icon}",
+    "format-ethernet": "{ipaddr}/{cidr} 󰈀",
+    "tooltip-format": "{ifname} via {gwaddr} 󱘖",
+    "format-linked": "{ifname} (No IP) ",
+    "format-disconnected": "⚠",
+    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"]
   },
 
   "custom/music": {
@@ -52,26 +96,13 @@
 
   "clock": {
     "tooltip-format": "<tt><small>{calendar}</small></tt>",
-    "format-alt": "{:%d/%m/%Y}",
-    "format": "{:%H:%M}"
+    "format": "{:%H:%M %d/%m/%y}"
   },
 
   "backlight": {
     "device": "intel_backlight",
     "format": "{icon}",
-    "format-icons": [
-      "\udb81\udee9",
-      "\udb86\ude4e",
-      "\udb86\ude4f",
-      "\udb86\ude50",
-      "\udb86\ude51",
-      "\udb86\ude52",
-      "\udb86\ude53",
-      "\udb86\ude54",
-      "\udb86\ude55",
-      "\udb86\ude56",
-      "\udb81\udee8"
-    ],
+    "format-icons": ["", "", "", "", "", "", "", "", ""],
     "tooltip": false
   },
 
@@ -81,48 +112,22 @@
       "critical": 15
     },
     "format": "{icon}",
-    "format-charging": "\udb80\udc84",
-    "format-plugged": "\udb80\udc84",
     "format-alt": "{capacity}% {icon}",
-    "format-icons": [
-      "\udb80\udc8e",
-      "\udb80\udc7a",
-      "\udb80\udc7b",
-      "\udb80\udc7c",
-      "\udb80\udc7d",
-      "\udb80\udc7e",
-      "\udb80\udc7f",
-      "\udb80\udc80",
-      "\udb80\udc81",
-      "\udb80\udc82",
-      "\udb80\udc79"
-    ],
-    "tooltip": false
+    "format-charging": "{icon}󱐋",
+    "format-plugged": "{icon}",
+    "format-icons": ["󰂎","󰁺","󰁻","󰁼","󰁽","󰁾","󰁿","󰂀","󰂁","󰂂","󰁹"]
   },
 
   "pulseaudio": {
-    "format": "{icon} {volume}%",
-    "format-muted": "\udb83\ude08",
+    "format": "{volume}% {icon}",
+    "format-muted": "MUTE 󰖁",
     "format-icons": {
       "default": [
-        "\udb81\udd7f",
-        "\udb81\udd80",
-        "\udb81\udd7e"
+        "󰕿",
+        "󰖀",
+        "󰕾"
       ]
     },
-    "on-click": "pavucontrol",
-    "tooltip": false
-  },
-
-  "custom/lock": {
-    "tooltip": false,
-    "on-click": "swaylock --config ~/.config/swaylock/config",
-    "format": ""
-  },
-
-  "custom/power": {
-    "tooltip": false,
-    "on-click": "wlogout &",
-    "format": ""
+    "on-click": "pavucontrol"
   }
 }

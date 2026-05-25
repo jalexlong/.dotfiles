@@ -2,7 +2,7 @@
   border: none;
   border-radius: 0;
   font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", monospace;
-  font-size: 15px;
+  font-size: 13px;
   min-height: 0;
 }
 
@@ -50,16 +50,33 @@ window#waybar {
 /* Shared module styling */
 
 #custom-music,
+#window,
+#cpu,
+#memory,
 #tray,
+#idle_inhibitor,
+#network,
 #backlight,
 #clock,
 #battery,
-#pulseaudio,
-#custom-lock,
-#custom-power {
+#pulseaudio {
   background-color: alpha(@surface0, 0.92);
   padding: 0.45rem 0.85rem;
   margin: 5px 0;
+}
+
+/* Left module group */
+
+#cpu {
+  color: @pink;
+  border-radius: 1rem 0 0 1rem;
+  margin-left: 1rem;
+}
+
+#memory {
+  color: @yellow;
+  border-radius: 0 1rem 1rem 0;
+  margin-right: 1rem;
 }
 
 /* Center music pill */
@@ -72,11 +89,14 @@ window#waybar {
 }
 
 /* Right module group */
+#idle_inhibitor {
+  border-radius: 1rem 0 0 1rem;
+  margin-left: 1rem;
+}
 
 #pulseaudio {
   color: @maroon;
-  border-radius: 1rem 0 0 1rem;
-  margin-left: 1rem;
+  border-radius: 0;
 }
 
 #backlight {
@@ -111,26 +131,5 @@ window#waybar {
 #tray {
   border-radius: 1rem;
   margin-right: 1rem;
-}
-
-#custom-lock {
-  color: @lavender;
-  border-radius: 1rem 0 0 1rem;
-}
-
-#custom-lock:hover {
-  color: @crust;
-  background-color: @lavender;
-}
-
-#custom-power {
-  color: @red;
-  border-radius: 0 1rem 1rem 0;
-  margin-right: 1rem;
-}
-
-#custom-power:hover {
-  color: @crust;
-  background-color: @red;
 }
 
