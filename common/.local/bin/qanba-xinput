@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# qanba-xinput: Map Qanba 1008 v2 to an XInput device via xboxdrv
+
+# Exit immediately if xboxdrv isn't installed
+if ! command -v xboxdrv &> /dev/null; then
+    echo "Error: xboxdrv is not installed." >&2
+    exit 1
+fi
+
+# Check if an instance of xboxdrv is already running on the system
+if pgrep -x "xboxdrv" &> /dev/null; then
+    echo "Error: An instance of XboxDRV is already active." >&2
+    echo "If this is a stuck process, try running: sudo pkill xboxdrv" >&2
+    echo "and then rerun this script." >&2
+    exit 1
+fi
+
+# Dynamically locate the event ID for the Qanba stick
+EVENT_DEV=$(grep -E 'Name="Qanba.*Joystick' -A 4 /proc/bus/input/devices | \
+            grep -oE 'event[0-9]+' | head -n 1)
+
+if [ -z "$EVENT_DEV" ]; then
+    echo "Error: Qanba Arcade Joystick not found. Is it plugged in?" >&2
+    exit 1
+fi
+
+echo "Found Qanba Joystick at /dev/input/$EVENT_DEV"
+echo "Authenticating via Polkit..."
+
+# Run pkexec in the foreground; it handles running xboxdrv in background via nohup
+pkexec bash -c "nohup xboxdrv --evdev /dev/input/$EVENT_DEV \
+  --evdev-absmap ABS_HAT0X=dpad_x,ABS_HAT0Y=dpad_y \
+  --evdev-keymap BTN_SOUTH=x,BTN_EAST=a,BTN_C=b,BTN_NORTH=y \
+  --evdev-keymap BTN_WEST=lb,BTN_Z=rb,BTN_TL=lt,BTN_TR=rt \
+  --evdev-keymap BTN_TL2=back,BTN_TR2=start \
+  --force-feedback \
+  --silent &> /dev/null &"
+
+echo "Success! Now the Qanba Joystick should be detected as an Xbox controller."
+
