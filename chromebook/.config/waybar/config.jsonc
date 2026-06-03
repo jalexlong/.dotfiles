@@ -1,14 +1,14 @@
 {
   "layer": "top",
   "position": "top",
-  "height": 30,
+  "height": 40,
   "spacing": 0,
 
   "modules-left": [
-    "sway/mode",
-    "sway/scratchpad",
     "cpu",
-    "memory"
+    "memory",
+    "sway/mode",
+    "sway/scratchpad"
   ],
 
   "modules-center": [
@@ -53,12 +53,24 @@
   },
 
   "cpu": {
+    "interval": 10,
     "format": "{usage}% ",
-    "tooltip": false
+    "tooltip": false,
+    "states": {
+        "good": 30,
+        "warning": 60,
+        "critical": 85
+    }
   },
 
   "memory": {
-    "format": "{}% "
+    "interval": 30,
+    "format": "{}% ",
+    "states": {
+        "good": 50,
+        "warning": 75,
+        "critical": 90
+    }
   },
 
   "tray": {
@@ -77,11 +89,14 @@
   "network": {
     "family": "ipv4",
     "format-wifi": "{icon}",
-    "format-ethernet": "{ipaddr}/{cidr} 󰈀",
-    "tooltip-format": "{ifname} via {gwaddr} 󱘖",
+    "format-ethernet": "󰌘",
     "format-linked": "{ifname} (No IP) ",
-    "format-disconnected": "⚠",
-    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"]
+    "format-disconnected": "󰌙",
+    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+    "tooltip-format": "{ifname} via {gwaddr}",
+    "tooltip-format-ethernet": "{ipaddr}/{cidr}",
+    "tooltip-format-wifi": "{essid} ({signalStrength}%)",
+    "tooltip-format-disconnected": "Disconnected"
   },
 
   "custom/music": {
@@ -100,14 +115,19 @@
   },
 
   "backlight": {
+    "disable-scroll": true,
+    "scroll-step": 5,
+    "min-brightness": 5,
     "device": "intel_backlight",
     "format": "{icon}",
     "format-icons": ["", "", "", "", "", "", "", "", ""],
-    "tooltip": false
+    "tooltip": true,
+    "tooltip-format": "Brightness: {percent}%"
   },
 
   "battery": {
     "states": {
+      "good": 95,
       "warning": 30,
       "critical": 15
     },
@@ -119,15 +139,18 @@
   },
 
   "pulseaudio": {
-    "format": "{volume}% {icon}",
-    "format-muted": "MUTE 󰖁",
+    "format": "{icon} {volume}%",
+    "format-bluetooth": "{icon} {volume}%",
+    "format-muted": "󰖁",
     "format-icons": {
-      "default": [
-        "󰕿",
-        "󰖀",
-        "󰕾"
-      ]
-    },
-    "on-click": "pavucontrol"
+      "hands-free": "󱡏",
+      "headset": "󰋎",
+      "phone": "",
+      "portable": "",
+      "car": "",
+      "default": ["󰕿", "󰖀", "󰕾"],
+    "scroll-step": 5,
+    "max-volume": 100
+    }
   }
 }
