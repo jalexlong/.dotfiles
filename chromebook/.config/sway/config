@@ -15,9 +15,9 @@ set $term foot
 # Your preferred application launcher
 set $menu wofi -S drun
 # Your preferred file manager
-set $files nemo
+set $files thunar
 # Your preferred web browser
-set $browser qutebrowser
+set $browser firefox
 
 # Give 'em that **g a p**, son
 gaps inner 5
@@ -31,7 +31,7 @@ default_border pixel 2
 # Basics:
 #
     # Start a terminal
-    bindsym $mod+Return exec $term
+    bindsym $mod+Return exec "swaymsg workspace 1 && $term"
     bindsym $mod+Shift+Return exec $term --title floating-terminal
     for_window [title="floating-terminal"] floating enable, resize set width 900 px height 500 px, move position center
 
@@ -43,14 +43,6 @@ default_border pixel 2
 
     # Start file manager
     bindsym $mod+f exec $files
-
-    # Start web browser
-    bindsym $mod+b exec $browser
-
-    # Useful utilities
-    bindsym $mod+c exec wl-copy < /dev/null
-    bindsym $mod+Shift+b exec sh -c 'pkill -SIGUSR1 waybar || waybar'
-    bindsym $mod+Shift+n exec makoctl dismiss --all
 
     # Drag floating windows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.
