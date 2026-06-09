@@ -1,2 +1,0 @@
-# America/Chicago (Central Time)
-alias rshift='redshift -l 41.98:-88.10 &> /dev/null &'
