@@ -28,7 +28,9 @@ function upall() {
     if command -v tldr &> /dev/null; then
         echo "[+] Updating tldr/tealdeer caches."
         sleep 1
-        tldr --update
+        local timeout_msg="[#] WARN: `tldr --update` timed out. Skipping..."
+        timeout --kill-after 5m 30s tldr --update \
+            || echo $timeout_msg
     fi
 
     echo "[+] System upgrade complete!"
