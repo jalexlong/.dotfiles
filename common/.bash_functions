@@ -3,7 +3,7 @@
 # full update for apt/pacman, flatpak and more.
 function upall() {
     sudo -v
-    echo "Starting full system upgrade."
+    echo "[+] Starting full system upgrade."
     sleep 1
 
     # update system packages
@@ -28,9 +28,8 @@ function upall() {
     if command -v tldr &> /dev/null; then
         echo "[+] Updating tldr/tealdeer caches."
         sleep 1
-        local timeout_msg="[#] WARN: `tldr --update` timed out. Skipping..."
-        timeout --kill-after 5m 30s tldr --update \
-            || echo $timeout_msg
+        local timeout_msg="[#] WARN: tldr update is taking too long. Skipping..."
+        timeout --kill-after 30s 10s tldr --update || echo $timeout_msg
     fi
 
     echo "[+] System upgrade complete!"
