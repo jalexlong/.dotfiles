@@ -74,3 +74,14 @@ function extract() {
     esac
 }
 
+# detect and activate python virtual environment
+function activate() {
+    if [ -d .venv ]; then
+        source .venv/bin/activate
+    elif [ -d venv ]; then
+        source venv/bin/activate
+    else
+        echo "No virtual environment detected."
+    fi
+}
+
