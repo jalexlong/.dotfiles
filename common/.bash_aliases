@@ -99,9 +99,10 @@ alias \
     vprofile="vim ~/.profile" \
 	vvim="vim ~/.vimrc" \
 	vnvim="vim ~/.config/nvim/init.vim" \
-	vsway="vim ~/.config/sway/config.d/" \
+	vsway="vim ~/.config/sway/" \
 	vwaybar="vim ~/.config/waybar/" \
 	vtmux="vim ~/.tmux.conf" \
+    vssh="vim ~/.ssh/" \
 	vfetch="vim ~/.config/fastfetch/"
 
 # git
