@@ -1,0 +1,185 @@
+#!/usr/bin/env python3
+"""tmux-move-pane -- move the focused pane to a full-width/height band, the way
+a tiling WM moves a window.
+
+    tmux-move-pane up      focused pane becomes a full-width band on top
+    tmux-move-pane down    ... a full-width band underneath everything else
+    tmux-move-pane left    ... a full-height column on the left
+    tmux-move-pane right   ... a full-height column on the right
+
+The remaining panes tile evenly in what is left over. This is distinct from
+swap-pane, which trades two panes' positions without changing the layout.
+
+up and left are just tmux's main-horizontal / main-vertical layouts with the
+focused pane promoted to the main position. tmux only gained mirrored variants
+of those in 3.5, so down and right are done by rewriting the layout string:
+tmux accepts a layout back if the 16-bit checksum prefix is recomputed, which
+is what checksum() below does.
+"""
+import subprocess
+import sys
+
+DIRECTIONS = ("up", "down", "left", "right")
+
+
+def tmux(*args):
+    return subprocess.run(("tmux",) + args, capture_output=True, text=True,
+                          check=True).stdout.rstrip("\n")
+
+
+def checksum(body):
+    """tmux's layout_checksum: rotate-right-1 then add, over the layout body."""
+    c = 0
+    for ch in body.encode():
+        c = ((c >> 1) + ((c & 1) << 15)) & 0xFFFF
+        c = (c + ch) & 0xFFFF
+    return f"{c:04x}"
+
+
+class Cell:
+    __slots__ = ("w", "h", "x", "y", "kind", "children", "pane")
+
+    def __init__(self, w, h, x, y):
+        self.w, self.h, self.x, self.y = w, h, x, y
+        self.kind = "leaf"       # "leaf" | "h" (side by side) | "v" (stacked)
+        self.children = []
+        self.pane = None
+
+    def shift(self, dx, dy):
+        self.x += dx
+        self.y += dy
+        for c in self.children:
+            c.shift(dx, dy)
+
+    def dump(self):
+        head = f"{self.w}x{self.h},{self.x},{self.y}"
+        if self.kind == "leaf":
+            return f"{head},{self.pane}"
+        open_, close = ("{", "}") if self.kind == "h" else ("[", "]")
+        return head + open_ + ",".join(c.dump() for c in self.children) + close
+
+
+class Parser:
+    def __init__(self, s):
+        self.s, self.i = s, 0
+
+    def peek(self):
+        return self.s[self.i] if self.i < len(self.s) else ""
+
+    def number(self):
+        start = self.i
+        while self.i < len(self.s) and self.s[self.i].isdigit():
+            self.i += 1
+        return int(self.s[start:self.i])
+
+    def expect(self, ch):
+        if self.peek() != ch:
+            raise ValueError(f"expected {ch!r} at offset {self.i} in {self.s!r}")
+        self.i += 1
+
+    def cell(self):
+        w = self.number(); self.expect("x")
+        h = self.number(); self.expect(",")
+        x = self.number(); self.expect(",")
+        y = self.number()
+        cell = Cell(w, h, x, y)
+        nxt = self.peek()
+        if nxt in ("{", "["):
+            cell.kind = "h" if nxt == "{" else "v"
+            self.i += 1
+            cell.children.append(self.cell())
+            while self.peek() == ",":
+                self.i += 1
+                cell.children.append(self.cell())
+            self.expect("}" if nxt == "{" else "]")
+        elif nxt == ",":
+            self.i += 1
+            cell.pane = self.number()
+        return cell
+
+
+def parse(layout):
+    _, body = layout.split(",", 1)
+    return Parser(body).cell()
+
+
+def mirror_top(root, axis):
+    """Reverse the order of the root's two children along axis 'v' or 'h'.
+
+    main-horizontal always yields a root of exactly two stacked children (the
+    main pane, then a row holding the rest); main-vertical the same side by
+    side. Anything else is left alone rather than guessed at.
+    """
+    if root.kind != axis or len(root.children) != 2:
+        return False
+    first, second = root.children
+    if axis == "v":
+        second.shift(0, root.y - second.y)
+        first.shift(0, (second.y + second.h + 1) - first.y)
+    else:
+        second.shift(root.x - second.x, 0)
+        first.shift((second.x + second.w + 1) - first.x, 0)
+    root.children = [second, first]
+    return True
+
+
+def band_pane(direction):
+    """The pane occupying the band, i.e. the last cell after mirroring.
+
+    Found by position -- bottom-most for down, right-most for right -- not by
+    "spans the full window width". With only two panes the layout is a pure
+    stack and BOTH panes span the full width, so a size test picks whichever
+    happens to be listed first and moves the wrong one.
+    """
+    edge = "top" if direction == "down" else "left"
+    rows = tmux("list-panes", "-F",
+                "#{pane_id} #{pane_" + edge + "}").splitlines()
+    best, best_at = None, -1
+    for row in rows:
+        pane_id, at = row.split()
+        if int(at) > best_at:
+            best, best_at = pane_id, int(at)
+    return best
+
+
+def main():
+    if len(sys.argv) != 2 or sys.argv[1] not in DIRECTIONS:
+        print(f"usage: {sys.argv[0]} {{{'|'.join(DIRECTIONS)}}}", file=sys.stderr)
+        return 2
+    direction = sys.argv[1]
+
+    if int(tmux("display", "-p", "#{window_panes}")) < 2:
+        return 0
+
+    me = tmux("display", "-p", "#{pane_id}")
+
+    # Promote the focused pane to the main position, which is index 0. Panes are
+    # addressed by %id here, not index, because swapping renumbers indices.
+    first = tmux("display", "-p", "-t", "{top-left}", "#{pane_id}")
+    if first != me:
+        tmux("swap-pane", "-d", "-s", me, "-t", first)
+
+    tmux("select-layout",
+         "main-horizontal" if direction in ("up", "down") else "main-vertical")
+
+    if direction in ("down", "right"):
+        root = parse(tmux("display", "-p", "#{window_layout}"))
+        if mirror_top(root, "v" if direction == "down" else "h"):
+            body = root.dump()
+            tmux("select-layout", f"{checksum(body)},{body}")
+
+            # select-layout assigns panes to cells in the window's pane-list
+            # ORDER and ignores the pane ids written in the layout string. So
+            # mirroring the cells moves the geometry but re-slots the panes into
+            # it -- the band ends up holding whichever pane sorts last, not the
+            # one being moved. Put the right pane in the band afterwards.
+            band = band_pane(direction)
+            if band and band != me:
+                tmux("swap-pane", "-d", "-s", me, "-t", band)
+
+    tmux("select-pane", "-t", me)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
