@@ -246,12 +246,20 @@ That block also re-adds the `user@host: dir` window title escape, which `~/.bash
 
 ## Testing
 
-Check Bash syntax:
+CI runs the same checks on every push (`.github/workflows/shellcheck.yml`). To run them locally:
 
 ```bash
 cd "$HOME/.dotfiles"
-bash -n install.sh scripts/*.sh
+
+bash -n install.sh scripts/*.sh                                    # syntax only
+shellcheck -x -S style install.sh scripts/*.sh                     # installer
+shellcheck -s bash -S style common/.bash_aliases common/.bash_functions
+shellcheck -s sh   -S style common/.profile.d/*.sh                 # must stay POSIX
 ```
+
+`bash -n` alone is not enough, which is why shellcheck is there. It passed cleanly the entire time `source ~/.local/aliases/*` was silently loading only the first file, and would pass on `ls --color=always` breaking pipes too.
+
+The two `-s` flags are not interchangeable. `common/.bash_aliases` and `common/.bash_functions` are bash. `common/.profile.d/*.sh` is sourced by `~/.profile`, which runs under `/bin/sh` on login, so those files must stay POSIX — checking them as bash would let a bashism through.
 
 Dry-run a package:
 
@@ -325,3 +333,7 @@ Base should stay boring.
 No apt logic in this repo. That belongs to paperweight-os.
 
 Machine-specific hardware tweaks should live in their own overlay package, not in `common`.
+
+## License
+
+MIT. See `LICENSE`.

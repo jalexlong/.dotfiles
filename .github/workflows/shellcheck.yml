@@ -1,0 +1,36 @@
+name: shellcheck
+
+# `bash -n` only checks syntax. It passed cleanly the whole time
+# `source ~/.local/aliases/*` was silently loading just the first file, and it
+# would pass on `ls --color=always` breaking pipes too. shellcheck catches that
+# class of bug; this runs it so the next one gets caught before it is committed.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      - name: Syntax check
+        run: bash -n install.sh scripts/*.sh
+
+      - name: Installer scripts
+        run: shellcheck -x -S style install.sh scripts/*.sh
+
+      # These are sourced, not executed, so shellcheck cannot infer the shell.
+      - name: Bash config
+        run: shellcheck -s bash -S style common/.bash_aliases common/.bash_functions
+
+      # ~/.profile.d/*.sh is sourced by ~/.profile, which runs under /bin/sh on
+      # login -- so these must stay POSIX, not bash.
+      - name: POSIX profile scripts
+        run: shellcheck -s sh -S style common/.profile.d/*.sh
