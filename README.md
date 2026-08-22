@@ -45,7 +45,10 @@ The `sway` and `chromebook` profiles were removed. Those desktops are owned by `
 │   │   ├── user-env.sh
 │   │   └── wayland.sh
 │   ├── .ssh/config
-│   └── .local/bin/qanba-xinput
+│   └── .local/bin/
+│       ├── border-test
+│       ├── cellsize
+│       └── qanba-xinput
 │
 ├── kitty/
 │   └── .config/kitty/kitty.conf
@@ -146,6 +149,15 @@ cosmic-term renders box-drawing characters from the font. It does not synthesize
 JetBrains Mono is the least-bad option there. It is not a fix; the deficit is a fixed 5% of the line box, so no font size scales it away.
 
 kitty draws box-drawing characters itself (`kitty/fonts/box_drawing.py` fills rows `0..cell_height` at full opacity), so its borders are seamless at any font and size. That is why kitty is the default terminal.
+
+Two tools in `common/.local/bin` exist for diagnosing this:
+
+```bash
+border-test    # renders what tmux draws borders with; look for a seam
+cellsize       # reports cell geometry and which fonts seam, in pixels
+```
+
+Run `cellsize` outside tmux. Inside tmux you measure tmux's grid, not the terminal's, and tmux reports no pixel dimensions.
 
 ## Default terminal
 
