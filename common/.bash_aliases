@@ -29,12 +29,33 @@ alias cv="command -v"
 
 # Command upgrades
 # ls
+#
+# The tree aliases (lt/lst/ltl) live inside each branch on purpose. -T and
+# --level are eza/exa flags; GNU ls has neither, and `ls -aHT --level=3` there
+# fails outright with "invalid tab size". Defining them once outside the
+# conditional silently broke them on any machine without eza installed.
 if command -v eza &> /dev/null; then
 	alias ls="eza --color=auto --group-directories-first --icons "
+	alias \
+		lt="eza -aHT --level=3" \
+		lst="eza -aHT --level=3" \
+		ltl="eza -lahHT --level=3"
 elif command -v exa &> /dev/null; then
 	alias ls="exa --color=auto --group-directories-first "
+	alias \
+		lt="exa -aHT --level=3" \
+		lst="exa -aHT --level=3" \
+		ltl="exa -lahHT --level=3"
 else
-	alias ls="ls --color=always "
+	# --color=auto, never =always: `always` emits escape codes even when stdout
+	# is a pipe, so `ls | grep '^name$'` stops matching.
+	alias ls="ls --color=auto "
+	if command -v tree &> /dev/null; then
+		alias \
+			lt="tree -a -L 3" \
+			lst="tree -a -L 3" \
+			ltl="tree -a -L 3 -p -h"
+	fi
 fi
 
 # vi/vim -> nvim - use .vimrc instead of nvim config
@@ -73,15 +94,12 @@ alias \
 	vids="cd ~/Videos" \
 	jams="cd ~/Music"
 
-# navigation
+# navigation (tree variants are defined with the ls alias above)
 alias \
 	la="ls -a" \
 	ll="ls -lh" \
 	lsa="ls -lah" \
-	lla="ls -lah" \
-	lt="ls -aHT --level=3" \
-	lst="ls -aHT --level=3" \
-	ltl="ls -lahHT --level=3"
+	lla="ls -lah"
 
 # file operations
 alias \
