@@ -3,7 +3,7 @@
 # |---------------------------------------+
 
 # Welcome to my personal bash aliases!
-# (C) 2024-2025 by JAlexLong
+# (C) 2024-2026 by JAlexLong
 
 # include optional aliases
 #
@@ -109,7 +109,7 @@ alias \
 	srm="sudo rm" \
 	srmd="sudo rm -r" \
 	mkd="mkdir -p" \
-	smkd="sudo mkdir -p" \
+	smkd="sudo mkdir -p"
 
 # tmux
 alias \
@@ -125,11 +125,8 @@ alias \
     vprofile="vim ~/.profile" \
 	vvim="vim ~/.vimrc" \
 	vnvim="vim ~/.config/nvim/init.vim" \
-	vsway="vim ~/.config/sway/" \
-	vwaybar="vim ~/.config/waybar/" \
 	vtmux="vim ~/.tmux.conf" \
-    vssh="vim ~/.ssh/" \
-	vfetch="vim ~/.config/fastfetch/"
+    vssh="vim ~/.ssh/"
 
 # git
 alias \
