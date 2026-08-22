@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# border-test -- render the characters tmux uses for pane borders.
+#
+# A terminal that draws box-drawing characters itself (kitty) shows one
+# unbroken line. A terminal that pulls the glyph from the font (cosmic-term)
+# shows a seam wherever the font's glyph is shorter than the terminal's line
+# box -- which reads as a stack of separate '|' marks.
+#
+# This is always a font/renderer question, never a tmux or locale one: tmux
+# emits real U+2502 whenever the client is UTF-8. Confirm that with
+#     tmux list-clients -F '#{client_utf8}'
+# See also: cellsize, which reports the pixel geometry behind the seam.
+set -u
+
+printf '\n  \033[1mvertical\033[0m -- should be ONE unbroken line, no notches:\n\n'
+for _ in $(seq 1 8); do printf '      \033[32m│\033[0m\n'; done
+
+printf '\n  \033[1mbox\033[0m -- corners and junctions should meet cleanly:\n\n'
+printf '      ┌────────────┬────────────┐\n'
+for _ in 1 2 3; do printf '      │            │            │\n'; done
+printf '      ├────────────┼────────────┤\n'
+for _ in 1 2 3; do printf '      │            │            │\n'; done
+printf '      └────────────┴────────────┘\n'
+
+printf '\n  \033[1mweights\033[0m   heavy ┏━━━┳━━━┓   rounded ╭───┬───╮   double ╔═══╦═══╗\n'
+printf '  \033[1mshading\033[0m   ░░░▒▒▒▓▓▓███   half blocks ▀▄▌▐\n'
+
+printf '\n  \033[1mnerd glyphs\033[0m -- tofu here means the font is not Nerd-patched:\n'
+printf '      powerline          devicons    \n'
+
+printf '\n  \033[1mtruecolor\033[0m -- should be a smooth ramp, not banded:\n      '
+for i in $(seq 0 47); do printf '\033[48;2;%d;%d;%dm ' $((i*5)) $((255-i*5)) 128; done
+printf '\033[0m\n\n'

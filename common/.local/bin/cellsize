@@ -1,0 +1,102 @@
+#!/usr/bin/env python3
+"""cellsize -- report this terminal's pixel geometry and whether box-drawing
+characters can join up in it.
+
+Run it OUTSIDE tmux. Inside tmux you measure tmux's idea of the grid, not the
+terminal's, and tmux does not report pixel dimensions at all.
+
+Background: a terminal that renders U+2502 from the font (cosmic-term) shows a
+seam wherever the glyph is shorter than the line box. A terminal that draws the
+character itself (kitty) fills the cell exactly and never seams. This tells you
+which situation you are in, and by how many pixels.
+"""
+import argparse, fcntl, os, struct, sys, termios
+
+# U+2502 glyph height in em, measured from the shipped TTFs with fontTools.
+# Add rows as needed:
+#   from fontTools.ttLib import TTFont; from fontTools.pens.boundsPen import BoundsPen
+#   f=TTFont(path); gs=f.getGlyphSet(); bp=BoundsPen(gs)
+#   gs[f.getBestCmap()[0x2502]].draw(bp)
+#   (bp.bounds[3]-bp.bounds[1]) / f['head'].unitsPerEm
+GLYPH_EM = {
+    "JetBrainsMonoNL NFM": 1.520,
+    "JetBrainsMono NFM":   1.520,
+    "MesloLGS NFM":        1.274,
+    "0xProto NFM":         1.212,
+}
+
+
+def tty_fd():
+    for stream in (sys.stdout, sys.stderr, sys.stdin):
+        try:
+            if os.isatty(stream.fileno()):
+                return stream.fileno(), False
+        except (ValueError, OSError):
+            pass
+    try:
+        return os.open("/dev/tty", os.O_RDONLY), True
+    except OSError:
+        return None, False
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--advance", type=float, default=0.600, metavar="EM",
+                    help="font advance width in em, used to derive the em size "
+                         "from the measured cell width. 0.600 is correct for "
+                         "JetBrains Mono, Meslo and 0xProto; check another font "
+                         "with: fc-query --format '%%{fontversion}' (default: 0.600)")
+    args = ap.parse_args()
+
+    fd, opened = tty_fd()
+    if fd is None:
+        print("not attached to a terminal", file=sys.stderr)
+        return 1
+    try:
+        rows, cols, xp, yp = struct.unpack(
+            "HHHH", fcntl.ioctl(fd, termios.TIOCGWINSZ, b"\0" * 8))
+    finally:
+        if opened:
+            os.close(fd)
+
+    in_tmux = bool(os.environ.get("TMUX"))
+    print(f"  TERM    : {os.environ.get('TERM', '?')}")
+    print(f"  grid    : {cols} cols x {rows} rows")
+
+    if in_tmux:
+        print("\n  running INSIDE tmux -- these are tmux's numbers, not the")
+        print("  terminal's, and tmux reports no pixel size. Re-run outside tmux.")
+        return 0
+
+    if not (xp and yp and cols and rows):
+        print("  pixels  : this terminal does not report pixel dimensions")
+        return 0
+
+    cw, ch = xp / cols, yp / rows
+    em = cw / args.advance
+    line_em = ch / em
+    print(f"  window  : {xp} x {yp} px")
+    print(f"  cell    : {cw:.3f} x {ch:.3f} px")
+    print(f"  em      : {em:.2f} px      (cell width / {args.advance} em advance)")
+    print(f"  line box: {line_em:.3f} em  ({ch:.2f} px)")
+    print()
+    print(f"  {'font':<22} {'U+2502':>8} {'':>8}  verdict")
+    print("  " + "-" * 56)
+    for name, gh in sorted(GLYPH_EM.items(), key=lambda kv: -kv[1]):
+        d = (gh - line_em) * em
+        if d > 0.05:
+            verdict = f"covers, {d:.2f}px overlap"
+        elif d < -0.05:
+            verdict = f"SEAMS, {-d:.2f}px short per row"
+        else:
+            verdict = "exact"
+        print(f"  {name:<22} {gh:>7.3f}em {gh * em:>7.2f}px  {verdict}")
+    print()
+    print("  A terminal that synthesizes box-drawing characters (kitty) ignores")
+    print("  all of this and fills the cell exactly.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
