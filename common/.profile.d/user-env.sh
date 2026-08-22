@@ -7,13 +7,13 @@ if [ -n "$BASH_VERSION" ]; then
 fi
 
 # set EDITOR to nvim/vim/vi respectively
-if command -v nvim &> /dev/null; then
+if command -v nvim > /dev/null 2>&1; then
     export EDITOR=nvim
     export VISUAL=nvim
-elif command -v vim &> /dev/null; then
+elif command -v vim > /dev/null 2>&1; then
     export EDITOR=vim
     export VISUAL=vim
-elif command -v vi &> /dev/null; then
+elif command -v vi > /dev/null 2>&1; then
     export EDITOR=vi
     export VISUAL=vi
 fi
