@@ -1,4 +1,13 @@
 */.gitignore
 .nvimlog
+
+# ~/.ssh is default-deny. Only the GitHub fragment is tracked; everything else
+# under common/.ssh/ -- keys, known_hosts, and any per-machine host fragment --
+# stays local. The config.d/* line matters: without it, un-ignoring the
+# directory would re-expose every fragment dropped into it later. Adding a new
+# host file is invisible to git unless it is un-ignored here on purpose.
 common/.ssh/*
 !common/.ssh/config
+!common/.ssh/config.d/
+common/.ssh/config.d/*
+!common/.ssh/config.d/10-github.conf
