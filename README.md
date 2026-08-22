@@ -246,7 +246,13 @@ That block also re-adds the `user@host: dir` window title escape, which `~/.bash
 
 ## Testing
 
-CI runs the same checks on every push (`.github/workflows/shellcheck.yml`). To run them locally:
+CI runs the same checks on every push (`.github/workflows/shellcheck.yml`), against a **pinned** shellcheck rather than `apt install shellcheck`, so a GitHub runner-image bump cannot silently change what is enforced. The version and its SHA256 live in the workflow's `env:` block; bumping is a deliberate commit that changes both together.
+
+The tarball is checksum-verified before it is extracted — the step downloads and then executes a binary, so an unverified download would be arbitrary code execution in CI.
+
+Note apt on Ubuntu 24.04 ships 0.9.0 while CI pins 0.10.0, so a local `apt install shellcheck` is one version behind. Both were run against this repo and both pass; for an exact match, install the same tarball the workflow does.
+
+To run the checks locally:
 
 ```bash
 cd "$HOME/.dotfiles"
