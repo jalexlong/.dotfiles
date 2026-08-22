@@ -189,3 +189,31 @@ elif command -v tty-clock &> /dev/null; then
 	alias clock="tty-clock"
 fi
 
+
+# +---------------------------------------+
+# |            prompt colors              |
+# +---------------------------------------+
+# Ubuntu's stock ~/.bashrc gates the color prompt on a TERM *name* whitelist:
+#     case "$TERM" in xterm-color|*-256color) color_prompt=yes;; esac
+# cosmic-term sets TERM=xterm-256color, which matches. kitty sets
+# TERM=xterm-kitty, which matches neither pattern, so the prompt silently falls
+# back to the plain white branch. (Inside tmux TERM=tmux-256color, which does
+# match, so kitty only loses the color OUTSIDE tmux.)
+#
+# ~/.bashrc is distro-owned and untracked, so rather than patch it, decide on
+# actual capability here instead of on the terminal's name. This file is
+# sourced by ~/.bashrc after PS1 is set, so it wins.
+if [ -x /usr/bin/tput ] && tput setaf 1 >/dev/null 2>&1; then
+    # bold green user@host, bold blue path. for an all-green prompt, change
+    # the 01;34 below to 01;32.
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+
+    # ~/.bashrc adds the "user@host: dir" window title for TERM=xterm*, but it
+    # does that BEFORE this file runs, so redefining PS1 above dropped it.
+    # xterm-kitty matches xterm*, so put it back.
+    case "$TERM" in
+        xterm*|rxvt*)
+            PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+            ;;
+    esac
+fi
