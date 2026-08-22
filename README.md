@@ -194,7 +194,7 @@ update-alternatives --query x-terminal-emulator | grep '^Value'
 
 This repo does not replace Debian or Pop!_OS default shell startup files.
 
-`scripts/ensure-shell-loaders.sh` patches the existing ones idempotently so distro updates to `~/.bashrc` and `~/.profile` keep flowing. It appends only what is missing:
+`scripts/ensure-shell-loaders.sh` patches the existing ones idempotently so distro updates to `~/.bashrc` and `~/.profile` keep flowing. It appends the loaders that are missing:
 
 ```text
 ~/.bashrc   ->  ~/.bash_aliases, ~/.bash_functions
@@ -202,6 +202,33 @@ This repo does not replace Debian or Pop!_OS default shell startup files.
 ```
 
 Environment variables live in `common/.profile.d/user-env.sh`.
+
+### The cargo PATH guard
+
+The same script rewrites one line of `~/.bashrc` in place, the only case where it edits rather than appends:
+
+```bash
+[ -d "$HOME/.cargo/bin" ] && export PATH="$HOME/.cargo/bin:$PATH"
+```
+
+`~/.bashrc` is sourced more than once per login — `~/.profile` sources it, and the `reload` alias sources `~/.profile` and `~/.bashrc` back to back — so an unguarded prepend adds another copy of the same directory every time. That is how `$PATH` ended up with `~/.local/bin` in it six times and `~/.cargo/bin` four times. The script wraps it in a membership test.
+
+It has to rewrite rather than append, because by the time an appended block would run the duplicate is already in `$PATH`.
+
+Between them, two mechanisms cover both shell types:
+
+| | login shells | non-login shells |
+|---|---|---|
+| reads `~/.profile` | yes | no |
+| fixed by | `path_dedupe` in `common/.profile.d/user-env.sh` | the `~/.bashrc` guard above |
+
+The rewrite is conservative. It skips a commented-out line, skips a file that has already been guarded, runs `bash -n` on the result and refuses to install a `~/.bashrc` that would not parse, and leaves a `~/.bashrc.dotfiles-backup` behind.
+
+Check for duplicates at any time with:
+
+```bash
+echo "$PATH" | tr ':' '\n' | sort | uniq -d
+```
 
 ### Prompt color
 
