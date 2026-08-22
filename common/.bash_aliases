@@ -5,9 +5,17 @@
 # Welcome to my personal bash aliases!
 # (C) 2024-2025 by JAlexLong
 
-# include optional aliases 
-if [[ -d ~/.local/aliases ]]; then
-    source ~/.local/aliases/*
+# include optional aliases
+#
+# `source dir/*` does NOT source every match: source takes ONE file and treats
+# any remaining words as positional parameters ($1, $2, ...) for it. So only the
+# first file was ever loaded, and the rest silently became arguments to it. On an
+# empty directory the glob stays literal and source errors on startup instead.
+if [ -d ~/.local/aliases ]; then
+    for _alias_file in ~/.local/aliases/*; do
+        [ -r "$_alias_file" ] && . "$_alias_file"
+    done
+    unset _alias_file
 fi
 
 # bash config reload in-place
