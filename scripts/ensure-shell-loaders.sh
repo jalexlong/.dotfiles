@@ -7,6 +7,11 @@
 #   ~/.bashrc   -> ~/.bash_aliases, ~/.bash_functions
 #   ~/.profile  -> ~/.profile.d/*.sh
 #   ~/.bashrc   -> guard the cargo PATH prepend (see ensure_cargo_guard)
+# The loader blocks below are single-quoted on purpose: they are written
+# verbatim INTO ~/.bashrc and ~/.profile, so $HOME has to survive as literal
+# text rather than expanding to this machine's home directory at patch time.
+# shellcheck disable=SC2016
+
 set -euo pipefail
 
 CARGO_MARKER='# dotfiles: guarded so re-sourcing cannot stack PATH copies'

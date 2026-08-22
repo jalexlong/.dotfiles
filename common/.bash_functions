@@ -29,7 +29,7 @@ function upall() {
         echo "[+] Updating tldr/tealdeer caches."
         sleep 1
         local timeout_msg="[#] WARN: tldr update is taking too long. Skipping..."
-        timeout --kill-after 30s 10s tldr --update || echo $timeout_msg
+        timeout --kill-after 30s 10s tldr --update || echo "$timeout_msg"
     fi
 
     echo "[+] System upgrade complete!"
@@ -37,14 +37,19 @@ function upall() {
 
 # quick bash refresh
 function refresh() {
-  cd $HOME
-  clear
-  source ~/.bashrc
+    cd "$HOME" || return 1
+    clear
+    # shellcheck source=/dev/null
+    source ~/.bashrc
 }
 
 # mkdir <dir> + cd <dir>
 function mkcd() {
-    mkdir -p "$1" && cd "$1"
+    if [ $# -lt 1 ]; then
+        echo "usage: mkcd <dir>"
+        return 1
+    fi
+    mkdir -p "$1" && cd "$1" || return 1
 }
 
 # extract any standard archive filetype
@@ -76,9 +81,11 @@ function extract() {
 
 # detect and activate python virtual environment
 function activate() {
+    # shellcheck source=/dev/null
     if [ -d .venv ]; then
         source .venv/bin/activate
     elif [ -d venv ]; then
+        # shellcheck source=/dev/null
         source venv/bin/activate
     else
         echo "No virtual environment detected."

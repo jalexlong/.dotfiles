@@ -13,6 +13,7 @@
 # empty directory the glob stays literal and source errors on startup instead.
 if [ -d ~/.local/aliases ]; then
     for _alias_file in ~/.local/aliases/*; do
+        # shellcheck source=/dev/null
         [ -r "$_alias_file" ] && . "$_alias_file"
     done
     unset _alias_file
@@ -226,6 +227,7 @@ fi
 # ~/.bashrc is distro-owned and untracked, so rather than patch it, decide on
 # actual capability here instead of on the terminal's name. This file is
 # sourced by ~/.bashrc after PS1 is set, so it wins.
+# shellcheck disable=SC2154  # debian_chroot is set by the distro's ~/.bashrc
 if [ -x /usr/bin/tput ] && tput setaf 1 >/dev/null 2>&1; then
     # bold green user@host, bold blue path. for an all-green prompt, change
     # the 01;34 below to 01;32.

@@ -9,6 +9,7 @@
 # rename lands inside the repo and changes made in COSMIC Settings show up as
 # ordinary `git diff`.
 set -euo pipefail
+# shellcheck source=scripts/_stow-lib.sh
 . "$(dirname "$(realpath "$0")")/_stow-lib.sh"
 
 require_stow
