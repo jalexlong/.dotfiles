@@ -11,3 +11,9 @@ common/.ssh/*
 !common/.ssh/config.d/
 common/.ssh/config.d/*
 !common/.ssh/config.d/10-github.conf
+
+# py_compile -- the CI check over the Python in common/.local/bin -- drops
+# these next to the scripts it checks when that check is run locally. Stow
+# would symlink the directory into ~/.local/bin along with the scripts.
+__pycache__/
+*.pyc
