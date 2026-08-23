@@ -26,7 +26,11 @@ The `sway` and `chromebook` profiles were removed. Those desktops are owned by `
 ```text
 .dotfiles/
 ├── README.md
+├── LICENSE
+├── .gitignore
 ├── install.sh
+├── .github/workflows/
+│   └── shellcheck.yml
 ├── scripts/
 │   ├── _stow-lib.sh
 │   ├── apply-base.sh
@@ -48,7 +52,8 @@ The `sway` and `chromebook` profiles were removed. Those desktops are owned by `
 │   └── .local/bin/
 │       ├── border-test
 │       ├── cellsize
-│       └── qanba-xinput
+│       ├── qanba-xinput
+│       └── tmux-move-pane
 │
 ├── kitty/
 │   └── .config/kitty/kitty.conf
@@ -190,6 +195,52 @@ xdg-mime query default x-scheme-handler/terminal
 update-alternatives --query x-terminal-emulator | grep '^Value'
 ```
 
+## Moving tmux panes
+
+`common/.local/bin/tmux-move-pane` moves the focused pane the way a tiling WM
+moves a window. It is bound in `.tmux.conf` to **`M-HJKL`** — no prefix, and
+Shift on the same keys that move the focus with `M-hjkl`:
+
+```text
+M-h / M-H     focus left  / move left
+M-j / M-J     focus down  / move down
+M-k / M-K     focus up    / move up
+M-l / M-L     focus right / move right
+```
+
+Each press is one step through tmux's layout tree. The first of these that
+applies wins, so the smallest change that means anything is the one that
+happens:
+
+| | when | result |
+|---|---|---|
+| swap | a pane alongside in a slot the same shape | the two trade places, no cell moves |
+| pair | in a row, moving across it | split just the slot shared with the neighbour |
+| reorder | a sibling in the same row | they change order, sizes travelling with them |
+| descend | a container that way | join it, beside the child it is nearest |
+| pop out | a plain pane that way, one level up | leave the container, land beside it |
+| band | nothing runs that way | full-width band, everything else beside it |
+
+`pair` sits that high deliberately: `descend` and `pop out` both cross a whole
+row in one press, and pairing first is what makes leaving a row gradual. It
+never competes with `reorder` — a pane is either stacked the way it is moving
+or across it, not both.
+
+So in `[A|B|C]`, moving C down gives `[A | B/C]` — C stacks under B alone and
+A is not touched. Pressing again gives `[[A|B]/C]`, under both. Crossing a row
+deliberately costs an extra press so that each one stays local.
+
+Why a layout tree and not `swap-pane` and `join-pane`: `join-pane` merges when
+it splits a cell whose parent already runs that way, so layouts flatten as
+panes move, and once a window is all columns nothing is above or below
+anything and vertical moves stop working entirely. Rewriting the layout string
+has no such bias. The reasoning, and the three tmux behaviours that shape the
+implementation, are in the script's docstring.
+
+The script is stowed as a symlink into this repo, so editing it takes effect
+on the next keypress. Changing the *bindings* needs `prefix + r`, since tmux
+only reads `.tmux.conf` at server start or on `source-file`.
+
 ## Shell startup files
 
 This repo does not replace Debian or Pop!_OS default shell startup files.
@@ -261,7 +312,17 @@ bash -n install.sh scripts/*.sh                                    # syntax only
 shellcheck -x -S style install.sh scripts/*.sh                     # installer
 shellcheck -s bash -S style common/.bash_aliases common/.bash_functions
 shellcheck -s sh   -S style common/.profile.d/*.sh                 # must stay POSIX
+
+# ~/.local/bin, picked by shebang because the directory is mixed
+shellcheck -x -S style $(grep -rlE '^#!.*\bbash\b' common/.local/bin)
+python3 -m py_compile $(grep -rlE '^#!.*python' common/.local/bin)
 ```
+
+The last two are selected by shebang rather than by globbing the directory:
+shellcheck errors out on a file it cannot read rather than skipping it, and
+`common/.local/bin` holds both bash and Python. `py_compile` only catches
+syntax errors, but these run under tmux's `run-shell`, where a broken script
+is a key that silently does nothing rather than an error you would see.
 
 `bash -n` alone is not enough, which is why shellcheck is there. It passed cleanly the entire time `source ~/.local/aliases/*` was silently loading only the first file, and would pass on `ls --color=always` breaking pipes too.
 
