@@ -35,21 +35,50 @@ sum(widths) + (n-1) == W. Every routine here maintains that.
 
 THE MOVE
 --------
-Walk up from the focused pane for the nearest ancestor whose parent runs along
-the axis of travel AND that has a sibling that way. What turns up decides it:
+First ask the cheap question: is there a pane right there, sitting in a slot
+the same shape as ours? If so the two simply trade places and nothing else on
+screen moves at all. That one case covers most of what a move means in
+practice -- including a grid, where the panes are cousins in different columns
+rather than siblings, and where restructuring instead would dissolve the grid
+and resize every pane in it.
 
-  reorder   the sibling is a pane and we never left home: the two swap places
-            in their parent. Sizes travel WITH the panes, so a pane keeps its
-            width as it goes -- which swap-pane cannot do.
-  descend   the sibling is a container: the pane joins it as a member, beside
-            whichever child it is closest to.
-  pop out   we had to climb first, so the pane leaves its own container and
-            lands beside it ONE level up. This is the step the primitive
-            version could not express: it jumped straight to a window-wide band.
+Otherwise walk up for the nearest ancestor whose parent runs along the axis of
+travel AND that has something on that side. What turns up decides it:
+
+  swap      a pane alongside us in an interchangeable slot: the two exchange,
+            every cell stays exactly where it was. tmux does this one itself.
+  reorder   a sibling in our own row: they change order. Sizes travel WITH the
+            panes here, so a pane keeps its width as it moves along the row --
+            which swap-pane cannot do.
+  descend   a container that way: the pane joins it as a member, beside
+            whichever child it is closest to. Entering it, rather than being
+            shoved past it, is what stops a move overshooting.
+  pop out   a plain pane that way, but we had to climb to find it: the pane
+            leaves its own container and lands beside it ONE level up.
   band      nothing runs that way at all, so create the split -- a new root
             with the pane as a full-width band (or full-height column) and
             everything else beside it. A pane already spanning that edge is the
             true edge case and does nothing.
+
+SIZES
+-----
+A move should not re-proportion a layout that was arranged deliberately, so:
+
+  * A pane arriving somewhere new asks for the share of the screen it already
+    had, not a flat half and not an even 1/n (share_span).
+  * Room for it comes off every sibling in proportion, and the space a pane
+    leaves behind is shared out the same way. Handing it all to the one
+    neighbour looks tidier in a single step -- everyone else keeps their exact
+    size -- but that neighbour then absorbs the cost of every move through it
+    and balloons, squeezing the rest a little further each pass. Sharing keeps
+    the survivors' sizes relative to each other and cancels out over repeats.
+  * Both directions are floored (floor_span, MIN_SPAN). Pure proportion
+    ratchets: a pane squeezed once computes its next share from the squeezed
+    size, and repeated moves walk it down to a single unusable line.
+
+Chasing one pane around a five-pane window used to take its neighbours from 39
+columns to 7 in a dozen presses. With the above the same cycle is periodic --
+the layout returns to exactly where it started.
 
 Same-orientation nesting is flattened after each move. That never changes what
 is on screen -- {A,{B,C}} and {A,B,C} are the same picture -- but it stops a
@@ -60,6 +89,9 @@ import subprocess
 import sys
 
 # axis of travel, and which way along it. 'h' cells hold children side by side.
+# Smallest pane a split will produce while the container can afford it.
+MIN_SPAN = 3
+
 DIRECTIONS = {
     "left":  ("h", -1),
     "right": ("h", +1),
@@ -176,11 +208,16 @@ def distribute(total, weights):
     n = len(weights)
     if total < n:
         return None                      # not even one cell each: unbuildable
+    # Hold everything at a few cells wherever the container can afford it. A
+    # 1-cell pane is legal and useless, and squeezing repeatedly is how one
+    # appears; below this the split is genuinely too tight and 1 is all there
+    # is to give.
+    lo = MIN_SPAN if total >= MIN_SPAN * n else 1
     base = sum(weights)
     if base <= 0:
         out = [total // n] * n
     else:
-        out = [max(1, round(total * w / base)) for w in weights]
+        out = [max(lo, round(total * w / base)) for w in weights]
     drift = total - sum(out)
     guard = 0
     while drift and guard < 1000:
@@ -190,7 +227,7 @@ def distribute(total, weights):
             if drift > 0:
                 out[i] += 1
                 drift -= 1
-            elif out[i] > 1:
+            elif out[i] > lo:
                 out[i] -= 1
                 drift += 1
         guard += 1
@@ -254,7 +291,16 @@ def flatten(cell):
 # --- structural edits -----------------------------------------------------
 
 def detach(node, root):
-    """Remove a leaf, give its space back to its siblings, return the root.
+    """Remove a leaf, share its space out proportionally, return the root.
+
+    Proportionally, and not to the one neighbour it was sitting next to. That
+    looks tempting -- every other pane keeps its exact size -- but it is the
+    one that wrecks a layout over time: the same neighbour absorbs the gap on
+    every pass, so it balloons while everything else is squeezed to make room
+    for it, and a pane chased around the window walks its neighbours down from
+    39 columns to 7. Sharing it out keeps the RELATIVE sizes of the survivors
+    exactly as they were, and gives and takes that cancel out over repeated
+    moves instead of accumulating.
 
     A container left holding one child is replaced by that child; otherwise the
     tree fills up with one-child cells that no longer mean anything.
@@ -277,11 +323,53 @@ def detach(node, root):
     return root
 
 
+def share_span(node, container):
+    """How big should `node` be once it is inside `container`?
+
+    Its share of the screen, kept. A pane that filled a third of the window
+    still fills about a third after it moves, instead of being handed a flat
+    half or an even 1/n -- which is what made a move visibly re-proportion
+    everything around it.
+    """
+    span = container.w if container.kind == "h" else container.h
+    n = len(container.children)
+    room = span - 2 * n                          # every sibling keeps >= 1
+    if room < 1:
+        return 1
+    total = container.w * container.h + node.w * node.h
+    frac = (node.w * node.h) / total if total else 0.5
+    return max(1, min(room, max(round(span * frac), floor_span(span, n + 1))))
+
+
+def floor_span(span, parts):
+    """The smallest share a moving pane may be given.
+
+    Pure proportion ratchets: a pane that gets squeezed once computes its next
+    share from the size it was squeezed to, so moving it repeatedly walks it
+    down to a single line and it can never recover. Holding it at half an even
+    share bounds that -- proportions still decide anything above the floor,
+    but the sequence converges instead of collapsing.
+    """
+    return max(2, (span // max(1, parts)) // 2)
+
+
 def insert(parent, index, node):
-    """Add a cell to a container, taking an even share off the others."""
-    others = [c.span() for c in parent.children]
+    """Add a cell, making room proportionally across the container.
+
+    The newcomer asks for the share of the screen it already had (share_span)
+    rather than a flat half or an even 1/n, and the room for it comes off
+    every existing child in proportion -- so they keep their sizes relative to
+    each other and only lose a little each. Taking it all from the one pane
+    being displaced is the same trap detach() describes: it singles out one
+    neighbour to pay for every move.
+    """
+    wide = parent.kind == "h"
+    want = share_span(node, parent)
     node.parent = parent
-    node.set_span(max(1, sum(others) // max(1, len(others))))
+    if wide:
+        node.w, node.h = want, parent.h
+    else:
+        node.w, node.h = parent.w, want
     parent.children.insert(index, node)
     return resize(parent, parent.w, parent.h)
 
@@ -322,8 +410,51 @@ def nearest_child(container, me):
     return best + (1 if centre > mids[best] else 0)
 
 
-def plan(me, axis, sign):
-    """Which of the four steps applies. Always (kind, cell, index, index)."""
+def adjacent(me, root, axis, sign):
+    """The pane whose cell touches ours on that side, sharing the most edge."""
+    best, most = None, 0
+    for leaf in root.leaves():
+        if leaf is me:
+            continue
+        if axis == "h":
+            touching = (leaf.x + leaf.w + 1 == me.x if sign < 0
+                        else me.x + me.w + 1 == leaf.x)
+            overlap = min(leaf.y + leaf.h, me.y + me.h) - max(leaf.y, me.y)
+        else:
+            touching = (leaf.y + leaf.h + 1 == me.y if sign < 0
+                        else me.y + me.h + 1 == leaf.y)
+            overlap = min(leaf.x + leaf.w, me.x + me.w) - max(leaf.x, me.x)
+        if touching and overlap > most:
+            best, most = leaf, overlap
+    return best
+
+
+def congruent(a, b, axis):
+    """Do these two cells occupy interchangeable slots?
+
+    Interchangeable across the axis of travel: same top and bottom for a
+    sideways move, same left and right for a vertical one. Two such panes can
+    trade places with nothing else on screen moving at all.
+    """
+    if axis == "h":
+        return a.y == b.y and a.h == b.h
+    return a.x == b.x and a.w == b.w
+
+
+def plan(me, root, axis, sign):
+    """Which step applies. Always (kind, cell, index, index)."""
+    # 1. Is there a pane right there, in a slot the same shape as ours? Then
+    #    the two just trade places and NOTHING else changes -- no cell moves,
+    #    no ratio is touched. This is what keeps a grid a grid. Siblings are
+    #    left to "reorder" below, which carries their sizes along with them
+    #    instead of swapping panes between fixed slots.
+    other = adjacent(me, root, axis, sign)
+    if (other is not None and congruent(me, other, axis)
+            and not (other.parent is me.parent and me.parent.kind == axis)):
+        return ("swap", other, None, None)
+
+    # 2. Otherwise walk up for the nearest ancestor that runs the way we are
+    #    going and has something on that side.
     cur = me
     while cur.parent is not None:
         parent = cur.parent
@@ -331,27 +462,38 @@ def plan(me, axis, sign):
             i = parent.children.index(cur)
             j = i + sign
             if 0 <= j < len(parent.children):
-                if cur is not me:
-                    # We had to climb, so the pane leaves its own container and
-                    # lands beside it -- one level up, not all the way out.
-                    return ("out", parent, i if sign < 0 else i + 1, None)
                 target = parent.children[j]
-                if target.kind == "leaf":
+                # A container next door is entered, not shoved past -- even
+                # when we had to climb to find it. Popping out is for when the
+                # thing that way is a plain pane, and it was popping out in
+                # both cases that made moves feel like they went too far.
+                if target.kind != "leaf":
+                    return ("descend", target, None, None)
+                if cur is me:
                     return ("reorder", parent, i, j)
-                return ("descend", target, None, None)
+                return ("out", parent, i if sign < 0 else i + 1, None)
         cur = parent
     return ("band", None, None, None)
 
 
 def apply_move(me, root, axis, sign):
-    """Mutate the tree. Returns the new root, or None if the move cannot be."""
-    kind, cell, i, j = plan(me, axis, sign)
+    """Work out and perform the step.
+
+    Returns ("swap", other_leaf) for a straight exchange of two panes, which
+    needs no new layout at all, or ("tree", root) for a structural change, or
+    (None, None) when there is nowhere to go.
+    """
+    kind, cell, i, j = plan(me, root, axis, sign)
+
+    if kind == "swap":
+        return "swap", cell
 
     if kind == "reorder":
-        # Sizes travel with the panes: a pane keeps its width as it moves,
-        # which is what a tiling WM does and what swap-pane cannot do.
+        # Sizes travel with the panes here: a pane keeps its width as it moves
+        # along its own row, which is what a tiling WM does and what swap-pane
+        # cannot. The row's set of widths is unchanged, they just move.
         cell.children[i], cell.children[j] = cell.children[j], cell.children[i]
-        return root
+        return "tree", root
 
     if kind == "descend":
         # Where to land is decided BEFORE detaching, while the pane still has
@@ -360,29 +502,37 @@ def apply_move(me, root, axis, sign):
             if cell.kind == axis else nearest_child(cell, me)
         root = detach(me, root)
         if root is None:
-            return None
-        return root if insert(cell, min(index, len(cell.children)), me) else None
+            return None, None
+        placed = insert(cell, min(index, len(cell.children)), me)
+        return ("tree", root) if placed else (None, None)
 
     if kind == "out":
         root = detach(me, root)
         if root is None:
-            return None
-        return root if insert(cell, min(i, len(cell.children)), me) else None
+            return None, None
+        placed = insert(cell, min(i, len(cell.children)), me)
+        return ("tree", root) if placed else (None, None)
 
     # band: nothing in the tree runs that way, so make the tree run that way.
     if spans_edge(me, root, axis, sign):
-        return None
+        return None, None
+    # Take the share of the screen the pane already had rather than a flat
+    # half. Promoting one of three columns to a full-width band should cost
+    # the other two a third of their height, not half of it.
+    whole = root.w * root.h
+    frac = (me.w * me.h) / whole if whole else 0.5
     root = detach(me, root)
     if root is None:
-        return None
+        return None, None
     band = Cell(root.w, root.h, root.x, root.y, kind=axis)
+    span = band.w if axis == "h" else band.h
+    mine = max(1, min(span - 2, max(round(span * frac), floor_span(span, 2))))
     me.parent = band
     root.parent = band
     band.children = [me, root] if sign < 0 else [root, me]
-    half = max(1, (band.w if axis == "h" else band.h) // 2)
-    me.set_span(half)
-    root.set_span(half)
-    return band if resize(band, band.w, band.h) else None
+    me.set_span(mine)
+    root.set_span(span - mine - 1)
+    return ("tree", band) if resize(band, band.w, band.h) else (None, None)
 
 
 def settle(want):
@@ -428,10 +578,18 @@ def main():
         if me is None:
             return 0
 
-        root = apply_move(me, root, axis, sign)
-        if root is None:
+        mode, result = apply_move(me, root, axis, sign)
+        if mode is None:
             return 0                     # at the edge, or too small to build
 
+        if mode == "swap":
+            # Two interchangeable slots: tmux can exchange the panes itself,
+            # which leaves every cell exactly where it was.
+            tmux("swap-pane", "-d", "-s", me_id, "-t", f"%{result.pane}")
+            tmux("select-pane", "-t", me_id)
+            return 0
+
+        root = result
         root.parent = None
         flatten(root)
         relayout(root)
