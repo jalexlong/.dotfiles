@@ -55,10 +55,21 @@ travel AND that has something on that side. What turns up decides it:
             shoved past it, is what stops a move overshooting.
   pop out   a plain pane that way, but we had to climb to find it: the pane
             leaves its own container and lands beside it ONE level up.
-  band      nothing runs that way at all, so create the split -- a new root
-            with the pane as a full-width band (or full-height column) and
-            everything else beside it. A pane already spanning that edge is the
-            true edge case and does nothing.
+  pair      nothing runs that way, but we are sitting in a row: split just the
+            slot we share with the neighbour beside us, rather than spanning
+            the whole window. [A|B|C] moving C down gives [A | B/C] -- B and C
+            share their old room, and A is not touched at all.
+  band      not even a neighbour to pair with, so create the split -- a new
+            root with the pane as a full-width band (or full-height column)
+            and everything else beside it. A pane already spanning that edge is
+            the true edge case and does nothing.
+
+Pairing is what makes a vertical move out of a row gradual. Once C is stacked
+with B its parent runs the way it is travelling, so the next press finds no
+sibling below, no neighbour left to pair with, and falls through to the band --
+[[A|B]/C], under A as well. Two presses to cross the window, not one, and the
+first one costs A nothing. The partner is the pane before us in the row where
+there is one, otherwise the one after.
 
 SIZES
 -----
@@ -473,6 +484,17 @@ def plan(me, root, axis, sign):
                     return ("reorder", parent, i, j)
                 return ("out", parent, i if sign < 0 else i + 1, None)
         cur = parent
+
+    # 3. Nothing runs that way, but if we are sitting in a row there is a
+    #    smaller move available than spanning the whole window: pair up with
+    #    the neighbour beside us and split just that slot. [A|B|C] moving C
+    #    down becomes [A | B/C], not a band under all three. Only once C is
+    #    stacked with B -- its parent then running the way it is travelling --
+    #    does the next press fall through to the band and go under A too.
+    row = me.parent
+    if row is not None and row.kind != axis and len(row.children) > 1:
+        i = row.children.index(me)
+        return ("tuck", row.children[i - 1 if i > 0 else i + 1], None, None)
     return ("band", None, None, None)
 
 
@@ -512,6 +534,48 @@ def apply_move(me, root, axis, sign):
             return None, None
         placed = insert(cell, min(i, len(cell.children)), me)
         return ("tree", root) if placed else (None, None)
+
+    if kind == "tuck":
+        partner, row = cell, me.parent
+        wide = row.kind == "h"
+        # The pair takes over exactly the room the two of them held, divider
+        # included, so every other pane in the row keeps the size it had --
+        # the sums work out with nothing to redistribute.
+        if wide:
+            box = (partner.w + me.w + 1, row.h, min(partner.x, me.x), row.y)
+        else:
+            box = (row.w, partner.h + me.h + 1, row.x, min(partner.y, me.y))
+        # Decide it is possible BEFORE touching the tree: two panes and the
+        # divider between them need three cells to live in, and below that
+        # there is nothing to do rather than a zero-height pane to create.
+        inner = (box[1] if axis == "v" else box[0]) - 1
+        if inner < 2:
+            return None, None
+        total = me.w * me.h + partner.w * partner.h
+        frac = (me.w * me.h) / total if total else 0.5
+        lo = max(1, min(floor_span(inner + 1, 2), inner // 2))
+        mine = max(lo, min(inner - lo, round(inner * frac)))
+
+        pair = Cell(*box, kind=axis)
+        row.children[row.children.index(partner)] = pair
+        row.children.remove(me)
+        pair.parent = row
+        partner.parent = me.parent = pair
+        pair.children = [partner, me] if sign > 0 else [me, partner]
+
+        ok = (resize(me, pair.w, mine) and resize(partner, pair.w, inner - mine)
+              if axis == "v" else
+              resize(me, mine, pair.h) and resize(partner, inner - mine, pair.h))
+        if not ok:
+            return None, None
+        if len(row.children) == 1:
+            # The row held only the two of us, so it is the pair now.
+            grand = row.parent
+            pair.parent = grand
+            if grand is None:
+                return "tree", pair
+            grand.children[grand.children.index(row)] = pair
+        return "tree", root
 
     # band: nothing in the tree runs that way, so make the tree run that way.
     if spans_edge(me, root, axis, sign):
