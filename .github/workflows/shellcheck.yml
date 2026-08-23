@@ -47,6 +47,27 @@ jobs:
       - name: Installer scripts
         run: shellcheck -x -S style install.sh scripts/*.sh
 
+      # ~/.local/bin helpers. Selected by shebang, not by globbing the
+      # directory: cellsize is Python, and shellcheck errors out rather than
+      # skipping a file it cannot handle.
+      - name: Local bin scripts
+        run: |
+          set -euo pipefail
+          mapfile -t scripts < <(grep -rlE '^#!.*\bbash\b' common/.local/bin | sort)
+          printf 'linting %s\n' "${scripts[@]}"
+          bash -n "${scripts[@]}"
+          shellcheck -x -S style "${scripts[@]}"
+
+      # The rest of ~/.local/bin is Python, which shellcheck cannot read at all.
+      # py_compile needs nothing installed and catches the syntax errors that
+      # would otherwise only show up as a keybinding that silently does nothing.
+      - name: Local bin python
+        run: |
+          set -euo pipefail
+          mapfile -t py < <(grep -rlE '^#!.*python' common/.local/bin | sort)
+          printf 'compiling %s\n' "${py[@]}"
+          python3 -m py_compile "${py[@]}"
+
       # These are sourced, not executed, so shellcheck cannot infer the shell.
       - name: Bash config
         run: shellcheck -s bash -S style common/.bash_aliases common/.bash_functions
