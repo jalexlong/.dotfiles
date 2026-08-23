@@ -55,21 +55,25 @@ travel AND that has something on that side. What turns up decides it:
             shoved past it, is what stops a move overshooting.
   pop out   a plain pane that way, but we had to climb to find it: the pane
             leaves its own container and lands beside it ONE level up.
-  pair      nothing runs that way, but we are sitting in a row: split just the
-            slot we share with the neighbour beside us, rather than spanning
-            the whole window. [A|B|C] moving C down gives [A | B/C] -- B and C
-            share their old room, and A is not touched at all.
-  band      not even a neighbour to pair with, so create the split -- a new
-            root with the pane as a full-width band (or full-height column)
-            and everything else beside it. A pane already spanning that edge is
-            the true edge case and does nothing.
+  band      nothing runs that way at all, so create the split -- a new root
+            with the pane as a full-width band (or full-height column) and
+            everything else beside it. A pane already spanning that edge is the
+            true edge case and does nothing.
 
-Pairing is what makes a vertical move out of a row gradual. Once C is stacked
-with B its parent runs the way it is travelling, so the next press finds no
-sibling below, no neighbour left to pair with, and falls through to the band --
-[[A|B]/C], under A as well. Two presses to cross the window, not one, and the
-first one costs A nothing. The partner is the pane before us in the row where
-there is one, otherwise the one after.
+Ahead of all of those except the swap comes one more:
+
+  pair      we are in a row and moving across it, so split just the slot we
+            share with the neighbour beside us. [A|B|C] moving C down gives
+            [A | B/C] -- B and C share their old room and A is untouched.
+
+Pairing is what keeps a move out of a row gradual, and it deliberately outranks
+both entering the container next door and popping out, because those cross the
+whole row in a single press. A pane leaves its row only once it is stacked with
+its neighbour: its parent then runs the way it is travelling, pairing no longer
+applies, and the walk takes over. So [A|B|C] moving C down twice gives
+[A | B/C] and then [[A|B]/C], under A as well -- two presses to cross, and the
+first costs A nothing. The partner is the pane before us in the row where there
+is one, otherwise the one after.
 
 SIZES
 -----
@@ -464,7 +468,28 @@ def plan(me, root, axis, sign):
             and not (other.parent is me.parent and me.parent.kind == axis)):
         return ("swap", other, None, None)
 
-    # 2. Otherwise walk up for the nearest ancestor that runs the way we are
+    # 2. Are we sitting in a row and moving across it? Then pair up with the
+    #    neighbour beside us and split just the slot we share, rather than
+    #    leaving the row in one press. [A|B|C] moving C down becomes
+    #    [A | B/C], and the rest of the row is not touched.
+    #
+    #    This is checked BEFORE the walk, so it also takes precedence over
+    #    entering the container next door and over popping out of the row --
+    #    both of which cross the whole row in a single press. The pane leaves
+    #    only once it is stacked with its neighbour, its parent then running
+    #    the way it is travelling, which is the case this test excludes. Every
+    #    move out of a row therefore costs a press more than it used to, and
+    #    each one is local.
+    #
+    #    A row too shallow to stack two panes and a divider inside cannot pair,
+    #    and falls through rather than doing nothing.
+    row = me.parent
+    if (row is not None and row.kind != axis and len(row.children) > 1
+            and (row.h if axis == "v" else row.w) >= 3):
+        i = row.children.index(me)
+        return ("tuck", row.children[i - 1 if i > 0 else i + 1], None, None)
+
+    # 3. Otherwise walk up for the nearest ancestor that runs the way we are
     #    going and has something on that side.
     cur = me
     while cur.parent is not None:
@@ -484,17 +509,6 @@ def plan(me, root, axis, sign):
                     return ("reorder", parent, i, j)
                 return ("out", parent, i if sign < 0 else i + 1, None)
         cur = parent
-
-    # 3. Nothing runs that way, but if we are sitting in a row there is a
-    #    smaller move available than spanning the whole window: pair up with
-    #    the neighbour beside us and split just that slot. [A|B|C] moving C
-    #    down becomes [A | B/C], not a band under all three. Only once C is
-    #    stacked with B -- its parent then running the way it is travelling --
-    #    does the next press fall through to the band and go under A too.
-    row = me.parent
-    if row is not None and row.kind != axis and len(row.children) > 1:
-        i = row.children.index(me)
-        return ("tuck", row.children[i - 1 if i > 0 else i + 1], None, None)
     return ("band", None, None, None)
 
 
