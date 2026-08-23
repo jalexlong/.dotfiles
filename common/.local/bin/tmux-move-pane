@@ -1,34 +1,82 @@
 #!/usr/bin/env python3
-"""tmux-move-pane -- move the focused pane to a full-width/height band, the way
-a tiling WM moves a window.
+"""tmux-move-pane -- move the focused pane one step, the way a tiling WM does.
 
-    tmux-move-pane up      focused pane becomes a full-width band on top
-    tmux-move-pane down    ... a full-width band underneath everything else
-    tmux-move-pane left    ... a full-height column on the left
-    tmux-move-pane right   ... a full-height column on the right
+    tmux-move-pane left|right|up|down
 
-The remaining panes tile evenly in what is left over. This is distinct from
-swap-pane, which trades two panes' positions without changing the layout.
+Modelled on COSMIC's Move(Direction), Super+Shift+HJKL on Pop!_OS, and on i3's
+tree_move underneath it. The pane takes ONE step through the layout tree and
+the rest of the layout closes up behind it. Bound to M-HJKL: Shift on the very
+keys that move the focus.
 
-up and left are just tmux's main-horizontal / main-vertical layouts with the
-focused pane promoted to the main position. tmux only gained mirrored variants
-of those in 3.5, so down and right are done by rewriting the layout string:
-tmux accepts a layout back if the 16-bit checksum prefix is recomputed, which
-is what checksum() below does.
+WHY A TREE AND NOT tmux's OWN COMMANDS
+--------------------------------------
+An earlier version drove swap-pane and join-pane and never parsed a layout.
+That is simpler, but join-pane MERGES: splitting a cell whose parent already
+runs that way appends to the parent instead of nesting, so layouts flatten as
+panes move and nesting can never be preserved. Rewriting the layout string has
+no such bias -- tmux accepts and keeps an `h` nested directly inside an `h`, a
+shape it would never build itself.
+
+Three tmux frictions shape everything below:
+
+  * select-layout IGNORES the pane ids in the layout string. Cells are filled
+    from the window's pane list in order, so applying a tree is only half the
+    job; the panes then have to be permuted into their cells. That is settle(),
+    and it is the price of this approach.
+  * The layout string carries a 16-bit checksum tmux verifies. checksum().
+  * Panes have a minimum size, so deep nesting eventually cannot be built at
+    all. Alternating splits top out near 6 levels in an 80x24 window and 10 in
+    a 300x80 one; past that tmux refuses, and so do we -- see distribute().
+
+Layout strings are a tree of cells. A leaf is `WxH,X,Y,pane`; `{...}` holds
+children side by side, `[...]` holds them stacked. Siblings are separated by a
+one-character divider, so n children of a W-wide row satisfy
+sum(widths) + (n-1) == W. Every routine here maintains that.
+
+THE MOVE
+--------
+Walk up from the focused pane for the nearest ancestor whose parent runs along
+the axis of travel AND that has a sibling that way. What turns up decides it:
+
+  reorder   the sibling is a pane and we never left home: the two swap places
+            in their parent. Sizes travel WITH the panes, so a pane keeps its
+            width as it goes -- which swap-pane cannot do.
+  descend   the sibling is a container: the pane joins it as a member, beside
+            whichever child it is closest to.
+  pop out   we had to climb first, so the pane leaves its own container and
+            lands beside it ONE level up. This is the step the primitive
+            version could not express: it jumped straight to a window-wide band.
+  band      nothing runs that way at all, so create the split -- a new root
+            with the pane as a full-width band (or full-height column) and
+            everything else beside it. A pane already spanning that edge is the
+            true edge case and does nothing.
+
+Same-orientation nesting is flattened after each move. That never changes what
+is on screen -- {A,{B,C}} and {A,B,C} are the same picture -- but it stops a
+pane accreting dead layers that would silently change where a later move goes.
+i3 does the same.
 """
 import subprocess
 import sys
 
-DIRECTIONS = ("up", "down", "left", "right")
+# axis of travel, and which way along it. 'h' cells hold children side by side.
+DIRECTIONS = {
+    "left":  ("h", -1),
+    "right": ("h", +1),
+    "up":    ("v", -1),
+    "down":  ("v", +1),
+}
 
 
-def tmux(*args):
-    return subprocess.run(("tmux",) + args, capture_output=True, text=True,
-                          check=True).stdout.rstrip("\n")
+def tmux(*args, check=True):
+    r = subprocess.run(("tmux",) + args, capture_output=True, text=True)
+    if check and r.returncode != 0:
+        raise RuntimeError(r.stderr.strip() or "tmux failed")
+    return r.stdout.rstrip("\n")
 
 
 def checksum(body):
-    """tmux's layout_checksum: rotate-right-1 then add, over the layout body."""
+    """tmux's layout_checksum: rotate right one, then add, over the body."""
     c = 0
     for ch in body.encode():
         c = ((c >> 1) + ((c & 1) << 15)) & 0xFFFF
@@ -37,19 +85,31 @@ def checksum(body):
 
 
 class Cell:
-    __slots__ = ("w", "h", "x", "y", "kind", "children", "pane")
+    __slots__ = ("kind", "w", "h", "x", "y", "children", "pane", "parent")
 
-    def __init__(self, w, h, x, y):
+    def __init__(self, w=0, h=0, x=0, y=0, kind="leaf", pane=None):
+        self.kind = kind          # "leaf" | "h" (side by side) | "v" (stacked)
         self.w, self.h, self.x, self.y = w, h, x, y
-        self.kind = "leaf"       # "leaf" | "h" (side by side) | "v" (stacked)
         self.children = []
-        self.pane = None
+        self.pane = pane
+        self.parent = None
 
-    def shift(self, dx, dy):
-        self.x += dx
-        self.y += dy
+    # Size along the parent's axis: width inside a row, height inside a stack.
+    def span(self):
+        return self.w if self.parent and self.parent.kind == "h" else self.h
+
+    def set_span(self, n):
+        if self.parent and self.parent.kind == "h":
+            self.w = n
+        else:
+            self.h = n
+
+    def leaves(self):
+        if self.kind == "leaf":
+            yield self
+            return
         for c in self.children:
-            c.shift(dx, dy)
+            yield from c.leaves()
 
     def dump(self):
         head = f"{self.w}x{self.h},{self.x},{self.y}"
@@ -74,7 +134,7 @@ class Parser:
 
     def expect(self, ch):
         if self.peek() != ch:
-            raise ValueError(f"expected {ch!r} at offset {self.i} in {self.s!r}")
+            raise ValueError(f"expected {ch!r} at {self.i} in {self.s!r}")
         self.i += 1
 
     def cell(self):
@@ -87,10 +147,13 @@ class Parser:
         if nxt in ("{", "["):
             cell.kind = "h" if nxt == "{" else "v"
             self.i += 1
-            cell.children.append(self.cell())
-            while self.peek() == ",":
+            while True:
+                child = self.cell()
+                child.parent = cell
+                cell.children.append(child)
+                if self.peek() != ",":
+                    break
                 self.i += 1
-                cell.children.append(self.cell())
             self.expect("}" if nxt == "{" else "]")
         elif nxt == ",":
             self.i += 1
@@ -99,85 +162,292 @@ class Parser:
 
 
 def parse(layout):
-    _, body = layout.split(",", 1)
-    return Parser(body).cell()
+    return Parser(layout.split(",", 1)[1]).cell()
 
 
-def mirror_top(root, axis):
-    """Reverse the order of the root's two children along axis 'v' or 'h'.
+# --- geometry -------------------------------------------------------------
+#
+# Sizes are integers that must add up exactly, so every split is a proportional
+# share plus an explicit pass to spend the rounding. A pane cannot be thinner
+# than one cell, which is where a layout too deep to build gets refused.
 
-    main-horizontal always yields a root of exactly two stacked children (the
-    main pane, then a row holding the rest); main-vertical the same side by
-    side. Anything else is left alone rather than guessed at.
-    """
-    if root.kind != axis or len(root.children) != 2:
-        return False
-    first, second = root.children
-    if axis == "v":
-        second.shift(0, root.y - second.y)
-        first.shift(0, (second.y + second.h + 1) - first.y)
+def distribute(total, weights):
+    """Split `total` into len(weights) integers >= 1, proportional to weights."""
+    n = len(weights)
+    if total < n:
+        return None                      # not even one cell each: unbuildable
+    base = sum(weights)
+    if base <= 0:
+        out = [total // n] * n
     else:
-        second.shift(root.x - second.x, 0)
-        first.shift((second.x + second.w + 1) - first.x, 0)
-    root.children = [second, first]
+        out = [max(1, round(total * w / base)) for w in weights]
+    drift = total - sum(out)
+    guard = 0
+    while drift and guard < 1000:
+        for i in range(n):
+            if not drift:
+                break
+            if drift > 0:
+                out[i] += 1
+                drift -= 1
+            elif out[i] > 1:
+                out[i] -= 1
+                drift += 1
+        guard += 1
+    return None if drift else out
+
+
+def resize(cell, w, h):
+    """Set a cell's box, rescaling its subtree proportionally to fit."""
+    cell.w, cell.h = w, h
+    if cell.kind == "leaf":
+        return True
+    n = len(cell.children)
+    wide = cell.kind == "h"
+    sizes = distribute((w if wide else h) - (n - 1),
+                       [c.w if wide else c.h for c in cell.children])
+    if sizes is None:
+        return False
+    for child, size in zip(cell.children, sizes):
+        if not resize(child, size if wide else w, h if wide else size):
+            return False
     return True
 
 
-def band_pane(direction):
-    """The pane occupying the band, i.e. the last cell after mirroring.
+def relayout(cell):
+    """Recompute absolute positions once every size is settled."""
+    if cell.kind == "leaf":
+        return
+    offset = cell.x if cell.kind == "h" else cell.y
+    for child in cell.children:
+        if cell.kind == "h":
+            child.x, child.y = offset, cell.y
+            offset += child.w + 1
+        else:
+            child.x, child.y = cell.x, offset
+            offset += child.h + 1
+        relayout(child)
 
-    Found by position -- bottom-most for down, right-most for right -- not by
-    "spans the full window width". With only two panes the layout is a pure
-    stack and BOTH panes span the full width, so a size test picks whichever
-    happens to be listed first and moves the wrong one.
+
+def flatten(cell):
+    """Splice a child into its parent when both run the same way.
+
+    The sizes already agree -- the inner cell's width is exactly its children's
+    widths plus their dividers -- so only the tree shape changes, and keeping
+    the flat one means a later move sees the panes as the siblings they look
+    like on screen.
     """
-    edge = "top" if direction == "down" else "left"
-    rows = tmux("list-panes", "-F",
-                "#{pane_id} #{pane_" + edge + "}").splitlines()
-    best, best_at = None, -1
-    for row in rows:
-        pane_id, at = row.split()
-        if int(at) > best_at:
-            best, best_at = pane_id, int(at)
-    return best
+    if cell.kind == "leaf":
+        return
+    i = 0
+    while i < len(cell.children):
+        child = cell.children[i]
+        if child.kind == cell.kind:
+            for grand in child.children:
+                grand.parent = cell
+            cell.children[i:i + 1] = child.children
+        else:
+            flatten(child)
+            i += 1
+
+
+# --- structural edits -----------------------------------------------------
+
+def detach(node, root):
+    """Remove a leaf, give its space back to its siblings, return the root.
+
+    A container left holding one child is replaced by that child; otherwise the
+    tree fills up with one-child cells that no longer mean anything.
+    """
+    parent = node.parent
+    parent.children.remove(node)
+    node.parent = None
+
+    if len(parent.children) > 1:
+        return root if resize(parent, parent.w, parent.h) else None
+
+    survivor = parent.children[0]
+    grand = parent.parent
+    survivor.parent = grand
+    if not resize(survivor, parent.w, parent.h):
+        return None
+    if grand is None:
+        return survivor
+    grand.children[grand.children.index(parent)] = survivor
+    return root
+
+
+def insert(parent, index, node):
+    """Add a cell to a container, taking an even share off the others."""
+    others = [c.span() for c in parent.children]
+    node.parent = parent
+    node.set_span(max(1, sum(others) // max(1, len(others))))
+    parent.children.insert(index, node)
+    return resize(parent, parent.w, parent.h)
+
+
+# --- the move -------------------------------------------------------------
+
+def spans_edge(me, root, axis, sign):
+    """Already the full band on the side we are moving toward?
+
+    Then there is nowhere further to go. Rebuilding an identical band would not
+    look like a move -- it would just reset a hand-resized layout to an even
+    split.
+    """
+    if axis == "v":
+        if me.w != root.w or me.x != root.x:
+            return False
+        return me.y == root.y if sign < 0 else me.y + me.h == root.y + root.h
+    if me.h != root.h or me.y != root.y:
+        return False
+    return me.x == root.x if sign < 0 else me.x + me.w == root.x + root.w
+
+
+def nearest_child(container, me):
+    """Where in a perpendicular container does the pane belong?
+
+    i3 inserts next to the container's focused child. tmux has one active pane
+    per window and no per-container focus history, so that cannot be
+    reproduced; this approximates it with the child the pane is physically
+    closest to, which is what it looks like from the outside anyway.
+    """
+    if container.kind == "h":
+        centre = me.x + me.w / 2
+        mids = [c.x + c.w / 2 for c in container.children]
+    else:
+        centre = me.y + me.h / 2
+        mids = [c.y + c.h / 2 for c in container.children]
+    best = min(range(len(mids)), key=lambda i: abs(mids[i] - centre))
+    return best + (1 if centre > mids[best] else 0)
+
+
+def plan(me, axis, sign):
+    """Which of the four steps applies. Always (kind, cell, index, index)."""
+    cur = me
+    while cur.parent is not None:
+        parent = cur.parent
+        if parent.kind == axis:
+            i = parent.children.index(cur)
+            j = i + sign
+            if 0 <= j < len(parent.children):
+                if cur is not me:
+                    # We had to climb, so the pane leaves its own container and
+                    # lands beside it -- one level up, not all the way out.
+                    return ("out", parent, i if sign < 0 else i + 1, None)
+                target = parent.children[j]
+                if target.kind == "leaf":
+                    return ("reorder", parent, i, j)
+                return ("descend", target, None, None)
+        cur = parent
+    return ("band", None, None, None)
+
+
+def apply_move(me, root, axis, sign):
+    """Mutate the tree. Returns the new root, or None if the move cannot be."""
+    kind, cell, i, j = plan(me, axis, sign)
+
+    if kind == "reorder":
+        # Sizes travel with the panes: a pane keeps its width as it moves,
+        # which is what a tiling WM does and what swap-pane cannot do.
+        cell.children[i], cell.children[j] = cell.children[j], cell.children[i]
+        return root
+
+    if kind == "descend":
+        # Where to land is decided BEFORE detaching, while the pane still has
+        # the geometry that says which child it is closest to.
+        index = (0 if sign > 0 else len(cell.children)) \
+            if cell.kind == axis else nearest_child(cell, me)
+        root = detach(me, root)
+        if root is None:
+            return None
+        return root if insert(cell, min(index, len(cell.children)), me) else None
+
+    if kind == "out":
+        root = detach(me, root)
+        if root is None:
+            return None
+        return root if insert(cell, min(i, len(cell.children)), me) else None
+
+    # band: nothing in the tree runs that way, so make the tree run that way.
+    if spans_edge(me, root, axis, sign):
+        return None
+    root = detach(me, root)
+    if root is None:
+        return None
+    band = Cell(root.w, root.h, root.x, root.y, kind=axis)
+    me.parent = band
+    root.parent = band
+    band.children = [me, root] if sign < 0 else [root, me]
+    half = max(1, (band.w if axis == "h" else band.h) // 2)
+    me.set_span(half)
+    root.set_span(half)
+    return band if resize(band, band.w, band.h) else None
+
+
+def settle(want):
+    """Put each pane in the cell the new tree gave it.
+
+    select-layout fills cells from the window's pane list in order and ignores
+    the ids in the layout string, so the panes have to be permuted into place
+    afterwards. swap-pane exchanges two panes' cells and their list positions
+    together, so a selection sort gets there in at most n-1 swaps.
+    """
+    have = tmux("list-panes", "-F", "#{pane_id}").splitlines()
+    at = {pane: i for i, pane in enumerate(have)}
+    for k, pane in enumerate(want):
+        if k >= len(have) or have[k] == pane:
+            continue
+        j = at[pane]
+        tmux("swap-pane", "-d", "-s", have[k], "-t", have[j])
+        at[have[k]], at[have[j]] = j, k
+        have[k], have[j] = have[j], have[k]
 
 
 def main():
     if len(sys.argv) != 2 or sys.argv[1] not in DIRECTIONS:
-        print(f"usage: {sys.argv[0]} {{{'|'.join(DIRECTIONS)}}}", file=sys.stderr)
+        name = sys.argv[0].rsplit("/", 1)[-1]
+        print(f"usage: {name} {{{'|'.join(DIRECTIONS)}}}", file=sys.stderr)
         return 2
-    direction = sys.argv[1]
+    axis, sign = DIRECTIONS[sys.argv[1]]
 
-    if int(tmux("display", "-p", "#{window_panes}")) < 2:
+    me_id, zoomed, count = tmux(
+        "display", "-p",
+        "#{pane_id} #{window_zoomed_flag} #{window_panes}").split()
+    if int(count) < 2:
         return 0
 
-    me = tmux("display", "-p", "#{pane_id}")
-
-    # Promote the focused pane to the main position, which is index 0. Panes are
-    # addressed by %id here, not index, because swapping renumbers indices.
-    first = tmux("display", "-p", "-t", "{top-left}", "#{pane_id}")
-    if first != me:
-        tmux("swap-pane", "-d", "-s", me, "-t", first)
-
-    tmux("select-layout",
-         "main-horizontal" if direction in ("up", "down") else "main-vertical")
-
-    if direction in ("down", "right"):
+    # A zoomed pane is the only one on screen and reports the whole window as
+    # its geometry, so unzoom to work and zoom back however this exits -- a
+    # tiling WM keeps a fullscreen window fullscreen when it moves it.
+    if zoomed == "1":
+        tmux("resize-pane", "-Z", "-t", me_id)
+    try:
         root = parse(tmux("display", "-p", "#{window_layout}"))
-        if mirror_top(root, "v" if direction == "down" else "h"):
-            body = root.dump()
+        me = next((c for c in root.leaves() if f"%{c.pane}" == me_id), None)
+        if me is None:
+            return 0
+
+        root = apply_move(me, root, axis, sign)
+        if root is None:
+            return 0                     # at the edge, or too small to build
+
+        root.parent = None
+        flatten(root)
+        relayout(root)
+
+        body = root.dump()
+        try:
             tmux("select-layout", f"{checksum(body)},{body}")
-
-            # select-layout assigns panes to cells in the window's pane-list
-            # ORDER and ignores the pane ids written in the layout string. So
-            # mirroring the cells moves the geometry but re-slots the panes into
-            # it -- the band ends up holding whichever pane sorts last, not the
-            # one being moved. Put the right pane in the band afterwards.
-            band = band_pane(direction)
-            if band and band != me:
-                tmux("swap-pane", "-d", "-s", me, "-t", band)
-
-    tmux("select-pane", "-t", me)
+        except RuntimeError:
+            # tmux validates the sizes as well as the checksum. A layout it
+            # will not take means the move does not fit, not that we crash.
+            return 0
+        settle([f"%{leaf.pane}" for leaf in root.leaves()])
+        tmux("select-pane", "-t", me_id)
+    finally:
+        if zoomed == "1":
+            tmux("resize-pane", "-Z", "-t", me_id, check=False)
     return 0
 
 
