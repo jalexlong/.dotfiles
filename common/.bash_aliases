@@ -116,7 +116,9 @@ alias \
 alias \
 	tmls="tmux ls " \
 	tmn="tmux new " \
-	tma="tmux attach "
+	tma="tmux attach " \
+	tmrm="tmux kill-session -t " \
+	tmrmd="tmux kill-server"
 
 # quick configs
 alias \

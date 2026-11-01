@@ -125,3 +125,9 @@ function _tlayout_complete() {
     mapfile -t COMPREPLY < <(compgen -W "$(_tlayout_names)" -- "${COMP_WORDS[COMP_CWORD]}")
 }
 complete -F _tlayout_complete tlayout
+
+# tab-complete running tmux session names for the tmrm alias (kill-session -t)
+function _tmux_sessions_complete() {
+    mapfile -t COMPREPLY < <(compgen -W "$(tmux ls -F '#{session_name}' 2>/dev/null)" -- "${COMP_WORDS[COMP_CWORD]}")
+}
+complete -F _tmux_sessions_complete tmrm
