@@ -44,7 +44,10 @@ The `sway` and `chromebook` profiles were removed. Those desktops are owned by `
 │   ├── .tmux.conf
 │   ├── .vimrc
 │   ├── .config/nvim/init.vim
+│   ├── .config/tmux/layouts/dash.tmux
 │   ├── .profile.d/
+│   │   ├── astro-env.sh
+│   │   ├── npm-env.sh
 │   │   ├── rust.sh
 │   │   ├── user-env.sh
 │   │   └── wayland.sh
@@ -253,6 +256,33 @@ on the next keypress. Changing the *bindings* needs `prefix + r`, since tmux
 only reads `.tmux.conf` at server start or on `source-file`. If `C-S-hjkl`
 still focuses after a reload, detach and reattach: tmux asks the outer terminal
 for extended keys when a client attaches.
+
+## tmux sessions and layouts
+
+Aliases in `common/.bash_aliases`:
+
+```text
+tmls            tmux ls                    list sessions
+tmn             tmux new                   new session
+tma             tmux attach                attach to a session
+tmrm <name>     tmux kill-session -t       kill one session; Tab completes names
+tmrmd           tmux kill-server           kill every session, no confirmation
+```
+
+`tmrmd` run from inside tmux also takes down the session it is typed in.
+
+Saved layouts live in `common/.config/tmux/layouts/<name>.tmux`, opened with
+`tlayout` from `common/.bash_functions`:
+
+```text
+tlayout         list layouts
+tlayout <name>  open one: a new window inside tmux, a new session outside it
+```
+
+A layout file is plain tmux commands that split one fresh pane — `split-window`
+with percentage sizes, `send-keys '<cmd>' Enter`, `select-pane`. Adding a
+`<name>.tmux` there is all it takes; `tlayout` and its completion find it.
+Nothing runs unless `tlayout` is called, so ordinary sessions are untouched.
 
 ## Shell startup files
 
