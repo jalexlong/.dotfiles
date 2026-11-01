@@ -3,3 +3,5 @@
 [user]
 	email = jalexlong@proton.me
 	name = J. Alex Long
+[credential]
+	helper = cache --timeout=3600
