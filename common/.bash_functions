@@ -92,3 +92,36 @@ function activate() {
     fi
 }
 
+
+# list the layout names tlayout knows, one per line
+function _tlayout_names() {
+    local f
+    for f in "${XDG_CONFIG_HOME:-$HOME/.config}"/tmux/layouts/*.tmux; do
+        [ -e "$f" ] || continue
+        f=${f##*/}
+        echo "${f%.tmux}"
+    done
+}
+
+# open a saved tmux layout from ~/.config/tmux/layouts/<name>.tmux: a new window
+# inside tmux, a new session outside it. With no name, list the layouts.
+function tlayout() {
+    if [ -z "$1" ]; then
+        _tlayout_names
+        return
+    fi
+    local file="${XDG_CONFIG_HOME:-$HOME/.config}/tmux/layouts/$1.tmux"
+    if [ ! -f "$file" ]; then
+        echo "tlayout: no such layout: $1" >&2
+        return 1
+    fi
+    if [ -n "$TMUX" ]; then
+        tmux new-window -n "$1" \; source-file "$file"
+    else
+        tmux new-session -s "$1" \; source-file "$file"
+    fi
+}
+function _tlayout_complete() {
+    mapfile -t COMPREPLY < <(compgen -W "$(_tlayout_names)" -- "${COMP_WORDS[COMP_CWORD]}")
+}
+complete -F _tlayout_complete tlayout
