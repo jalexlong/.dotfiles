@@ -198,15 +198,26 @@ update-alternatives --query x-terminal-emulator | grep '^Value'
 ## Moving tmux panes
 
 `common/.local/bin/tmux-move-pane` moves the focused pane the way a tiling WM
-moves a window. It is bound in `.tmux.conf` to **`M-HJKL`** — no prefix, and
-Shift on the same keys that move the focus with `M-hjkl`:
+moves a window. It is bound in `.tmux.conf` to **`C-S-hjkl`** — no prefix, and
+Shift on the same keys that move the focus with `C-hjkl`. The Meta set does
+the same and is kept as a fallback:
 
 ```text
-M-h / M-H     focus left  / move left
-M-j / M-J     focus down  / move down
-M-k / M-K     focus up    / move up
-M-l / M-L     focus right / move right
+C-h / C-S-h   M-h / M-H     focus left  / move left
+C-j / C-S-j   M-j / M-J     focus down  / move down
+C-k / C-S-k   M-k / M-K     focus up    / move up
+C-l / C-S-l   M-l / M-L     focus right / move right
 ```
+
+`C-hjkl` in the root table takes those keys from every program in a pane:
+clear-screen, newline, readline kill-line, and fzf's up/down. That is
+deliberate — they were mostly pressed by accident.
+
+`C-S-hjkl` only exists with tmux's extended keys, which the outer terminal has
+to support. foot and kitty do; kitty's own `ctrl+shift+hjkl` shortcuts are
+unmapped in `kitty.conf` so the keys reach tmux. In a terminal without extended
+keys (cosmic-term is unconfirmed, so not enabled) `C-S-h` arrives as plain `^H`
+and focuses instead of moving — use `M-HJKL` there.
 
 Each press is one step through tmux's layout tree. The first of these that
 applies wins, so the smallest change that means anything is the one that
@@ -239,7 +250,9 @@ implementation, are in the script's docstring.
 
 The script is stowed as a symlink into this repo, so editing it takes effect
 on the next keypress. Changing the *bindings* needs `prefix + r`, since tmux
-only reads `.tmux.conf` at server start or on `source-file`.
+only reads `.tmux.conf` at server start or on `source-file`. If `C-S-hjkl`
+still focuses after a reload, detach and reattach: tmux asks the outer terminal
+for extended keys when a client attaches.
 
 ## Shell startup files
 
